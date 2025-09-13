@@ -293,10 +293,32 @@
         </div>
     </div>
 
+    <script src="../js/scroll-reset.js"></script>
     <script src="../js/api-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Force scroll to top when page loads
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            window.scrollTo({
+                top: 0,
+                behavior: 'instant'
+            });
             loadTestDetails();
+        });
+
+        // Also handle if page loads with hash
+        window.addEventListener('load', function() {
+            if (window.location.hash === '#top') {
+                setTimeout(() => {
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'instant'
+                    });
+                }, 100);
+            }
         });
 
         function loadTestDetails() {

@@ -742,11 +742,29 @@ function updateScheduleButton() {
     }
 }
 
+// Force scroll to top function
+function forceScrollToTop() {
+    // Try multiple methods to ensure scroll to top works
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+
+    // Additional force for stubborn browsers
+    setTimeout(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }, 0);
+}
+
 // Call initialization when page loads
 document.addEventListener('DOMContentLoaded', function() {
+    // Force scroll to top when page loads
+    forceScrollToTop();
+
     initializePage();
     updateScheduleButton();
-    
+
     // Check if we should show results page
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('showResults') === 'true') {
@@ -754,4 +772,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clean up URL by removing the parameter
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+});
+
+// Also handle page show event (back/forward navigation)
+window.addEventListener('pageshow', function() {
+    forceScrollToTop();
 });

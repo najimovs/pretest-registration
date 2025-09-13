@@ -1,5 +1,8 @@
 // Auth JavaScript functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Scroll to top when page loads
+    window.scrollTo(0, 0);
+
     // Initialize auth functionality
     initAuthForms();
     setupPhoneInputs();

@@ -116,6 +116,8 @@ function closeB2BContactModal() {
 
 // Training type selection
 document.addEventListener('DOMContentLoaded', function() {
+    // Scroll to top when page loads
+    window.scrollTo(0, 0);
     // Training type selection
     document.querySelectorAll('.training-card').forEach(card => {
         card.addEventListener('click', function() {

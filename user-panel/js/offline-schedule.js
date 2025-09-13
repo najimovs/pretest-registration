@@ -404,12 +404,12 @@ async function proceedToTestDetails() {
             localStorage.setItem('offlineSchedule', JSON.stringify(scheduleData));
             
             // Show success message
-            showToast('Test scheduled successfully! Redirecting to test details...');
+            showToast('Test scheduled successfully!');
 
-            // Redirect to test details after delay
+            // Show admin contact alert after short delay
             setTimeout(() => {
-                window.location.href = './test-details.html';
-            }, 2000);
+                showAdminContactAlert();
+            }, 1500);
         } else {
             throw new Error(response.message || 'Failed to save schedule');
         }
@@ -498,6 +498,9 @@ function checkOfflineTestRestriction() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Scroll to top when page loads
+    window.scrollTo(0, 0);
+
     // Check for offline test restriction first
     if (checkOfflineTestRestriction()) {
         return; // Stop execution if user is restricted
@@ -526,3 +529,92 @@ document.addEventListener('DOMContentLoaded', function() {
         navigateMonth(1, 'speaking');
     });
 });
+
+// Admin contact alert function
+function showAdminContactAlert() {
+    // Remove existing alert if any
+    const existingAlert = document.querySelector('.admin-contact-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+
+    // Create alert overlay
+    const alertOverlay = document.createElement('div');
+    alertOverlay.className = 'admin-contact-alert';
+    alertOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+
+    // Create alert modal
+    const alertModal = document.createElement('div');
+    alertModal.style.cssText = `
+        background: white;
+        border-radius: 20px;
+        padding: 40px 30px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    `;
+
+    alertModal.innerHTML = `
+        <h3 style="
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        ">Successfully Registered!</h3>
+        <p style="
+            color: #6b7280;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            font-size: 1rem;
+        ">Your test has been scheduled successfully. Our admins will contact you soon with additional details.</p>
+        <button onclick="closeAdminAlert()" style="
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Continue</button>
+    `;
+
+    alertOverlay.appendChild(alertModal);
+    document.body.appendChild(alertOverlay);
+
+    // Show alert with animation
+    setTimeout(() => {
+        alertOverlay.style.opacity = '1';
+        alertModal.style.transform = 'scale(1)';
+    }, 100);
+}
+
+// Close admin alert and redirect
+function closeAdminAlert() {
+    const alert = document.querySelector('.admin-contact-alert');
+    if (alert) {
+        alert.style.opacity = '0';
+        setTimeout(() => {
+            alert.remove();
+            // Use URL with hash to force scroll to top
+            window.location.href = './test-details.html#top';
+        }, 300);
+    }
+}

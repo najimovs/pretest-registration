@@ -103,6 +103,8 @@ function saveBookingToUserData() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Scroll to top when page loads
+    window.scrollTo(0, 0);
     // Load and display booking details
     loadBookingDetails();
     
