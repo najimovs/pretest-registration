@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Profile - Pretest</title>
+      <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+    <!-- Alert Overlay -->
+    <div class="alert-overlay" id="alertOverlay">
+        <div class="alert-modal">
+            <svg class="alert-icon" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 20h20L12 2z" fill="#1A2B6C"/>
+                <path d="M12 8v6M12 16h.01" stroke="#FFFFF0" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <h3 class="alert-title">Confirm Logout</h3>
+            <p class="alert-message">Are you sure you want to log out?</p>
+            <div class="alert-buttons">
+                <button class="alert-btn alert-btn-yes" onclick="confirmLogout()">Yes</button>
+                <button class="alert-btn alert-btn-cancel" onclick="closeAlert()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div class="user-details-overlay" id="userDetailsOverlay">
+        <div class="user-details-modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Your Details</h3>
+                <button class="modal-close" onclick="closeUserDetails()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6L18 18M6 18L18 6"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="modalFirstName" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="modalLastName" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="modalPhone" readonly>
+                </div>
+                <div class="form-group" id="currentPasswordGroup" style="display: none;">
+                    <label>Current Password</label>
+                    <input type="password" id="modalCurrentPassword" placeholder="Enter current password">
+                </div>
+                <div class="form-group" id="newPasswordGroup" style="display: none;">
+                    <label>New Password</label>
+                    <input type="password" id="modalNewPassword" placeholder="Enter new password">
+                </div>
+                <div class="form-group" id="confirmPasswordGroup" style="display: none;">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="modalConfirmPassword" placeholder="Confirm new password">
+                </div>
+                <div class="form-group" id="forgotPasswordGroup" style="display: none;">
+                    <button type="button" class="forgot-password-btn" onclick="sendForgotPasswordSMS()">
+                        Forgot password? Send SMS verification
+                    </button>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-edit" id="editBtn" onclick="enableEdit()">Edit</button>
+                <button class="modal-btn modal-btn-close" onclick="closeUserDetails()">Close</button>
+                <button class="modal-btn modal-btn-save" id="saveBtn" onclick="saveDetails()" style="display: none;">Done</button>
+                <button class="modal-btn modal-btn-cancel" id="cancelBtn" onclick="cancelEdit()" style="display: none;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Profile Page -->
+    <div id="profilePage">
+        <!-- Header -->
+        <header class="header">
+            <div class="nav-brand">
+        <img src="../assets/images/logolight.png" alt="Pretest Logo" class="logo">
+      </div>
+            <div class="header-right">
+                <div class="user-avatar" onclick="showUserDetails()">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </div>
+                <div class="header-buttons">
+                    <button class="btn btn-secondary" onclick="showLogoutAlert()">Log out</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-title">
+                <h1>IELTS mock exam</h1>
+            </div>
+            <p class="page-subtitle">Improve your IELTS skills with our interactive mock exam platform.</p>
+
+            <!-- Action Cards -->
+            <div class="action-cards">
+                <div class="action-card" onclick="scheduleTest()">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                        <path d="M8 14l2 2 4-4"/>
+                    </svg>
+                    <h2 class="card-title">Schedule Test</h2>
+                    <p class="card-description">Book your offline IELTS exam slots</p>
+                    <button class="card-button">Schedule now</button>
+                </div>
+
+                <div class="action-card" onclick="viewTestDetails()">
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <h2 class="card-title">Test Details</h2>
+                    <p class="card-description">View your scheduled test information</p>
+                    <button class="card-button">View details</button>
+                </div>
+            </div>    
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+           <div class="footer-logo">
+             <img src="../assets/images/darklogo.png" alt="Pretest Logo" class="footer-logo-img">
+           </div>
+        </footer>
+    </div>
+
+    <!-- Results Page -->
+    <div class="results-page" id="resultsPage">
+        <svg class="results-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="31.416" stroke-dashoffset="7.854" opacity="0.3"/>
+            <circle cx="12" cy="12" r="10" stroke-dasharray="31.416" stroke-dashoffset="15.708" stroke-linecap="round">
+                <animateTransform attributeName="transform" type="rotate" values="0 12 12;360 12 12" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.6"/>
+        </svg>
+        <h2 class="results-title">Results Not Found</h2>
+        <p class="results-message">Please take a test first to view results.</p>
+        <a href="#" class="back-link" onclick="backToProfile()">Back to Profile</a>
+    </div>
+
+    <script src="../js/api-config.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>

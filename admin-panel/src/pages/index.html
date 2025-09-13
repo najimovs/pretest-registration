@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - IELTS Registration</title>
+    <link rel="stylesheet" href="../css/admin-styles.css">
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <img src="../../assets/images/logolight.png" alt="Pretest Logo" class="logo">
+                <div class="admin-info">
+                    <span class="admin-badge">Admin Panel</span>
+                    <button onclick="adminLogout()" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistics Dashboard -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="scheduledTests">0</div>
+                <div class="stat-label">Scheduled Tests</div>
+            </div>
+        </div>
+
+        <!-- Registrations Table -->
+        <div class="registrations-section">
+            <div class="section-header">
+                <h2 class="section-title">Student Registrations</h2>
+                <div class="export-buttons">
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        📊 Export to Excel
+                    </button>
+                    <button class="btn btn-primary" onclick="exportToWord()">
+                        📝 Export to Word
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="loading" id="loadingState">
+                    <div class="loading-spinner"></div>
+                    Loading registrations...
+                </div>
+
+                <table class="registrations-table" id="registrationsTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Phone</th>
+                            <th>Main Test</th>
+                            <th>Speaking Test</th>
+                            <th>Registration Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registrationsBody">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <h3>No registrations yet</h3>
+                    <p>Student registrations will appear here when they sign up and schedule tests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="../js/api-config.js"></script>
+    <script src="../js/admin-dashboard.js"></script>
+</body>
+</html>

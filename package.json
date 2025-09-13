@@ -1,0 +1,28 @@
+{
+  "name": "ielts-registration-system",
+  "version": "1.0.0",
+  "description": "Complete IELTS Registration and Management System",
+  "main": "run-all.sh",
+  "scripts": {
+    "start": "./run-all.sh",
+    "backend": "cd backend && npm start",
+    "user-panel": "cd user-panel && npm run dev",
+    "admin": "cd admin-panel && npm run dev",
+    "install-all": "cd backend && npm install && cd ../user-panel && npm install && cd ../admin-panel && npm install"
+  },
+  "keywords": [
+    "ielts",
+    "registration",
+    "test-management",
+    "admin-panel",
+    "mongodb",
+    "express",
+    "vite"
+  ],
+  "author": "IELTS Registration Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ielts-registration"
+  }
+}

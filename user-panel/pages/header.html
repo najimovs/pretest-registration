@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pretest - IELTS Mock Test Platform</title>
+  <link rel="icon" type="image/png" href="assets/images/logolight.png">
+  <link rel="stylesheet" href="css/main.css" type="text/css">
+</head>
+
+<body>
+  <!-- Header Navigation -->
+  <header class="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <img src="assets/images/logolight.png" alt="Pretest Logo" class="logo">
+      </div>
+      <nav class="nav-menu">
+        <a href="#hero" class="nav-link">Home</a>
+        <a href="#how-it-works" class="nav-link">How it works</a>
+        <a href="#testimonials" class="nav-link">Testimonials</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+        <a href="#contact" class="nav-link">Contact us</a>
+      </nav>
+      <div class="nav-actions">
+        <div class="language-selector">
+          <div class="dropdown">
+            <button class="dropdown-toggle" id="languageToggle">
+              <img src="assets/images/us-flag.png" alt="US Flag" width="20" height="15" id="currentFlag">
+              <span id="currentLang">ENG</span>
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1L6 6L11 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="dropdownMenu">
+              <a href="#" class="dropdown-item" data-lang="uzb">
+                <img src="assets/images/uzb.svg" alt="Uzbekistan Flag" width="20" height="15">
+                <span>UZB</span>
+              </a>
+              <a href="#" class="dropdown-item" data-lang="rus">
+                <svg width="20" height="15" viewBox="0 0 20 15" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="20" height="5" fill="#FFFFFF"/>
+                  <rect y="5" width="20" height="5" fill="#0052B4"/>
+                  <rect y="10" width="20" height="5" fill="#D80027"/>
+                </svg>
+                <span>RUS</span>
+              </a>
+              <a href="#" class="dropdown-item" data-lang="eng">
+                <img src="assets/images/us-flag.png" alt="US Flag" width="20" height="15">
+                <span>ENG</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="window.location.href='pages/auth/signup.html'">Sign up</button>
+        <button class="btn btn-primary" onclick="window.location.href='pages/auth/login.html'">Login</button>
+      </div>
+    </div>
+  </header>

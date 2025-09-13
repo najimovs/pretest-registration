@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Details - IELTS Registration</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <style>
+        .test-details-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
+        
+        .details-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #1A2B6C 0%, #0f1729 50%, #000000 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .card-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .card-content {
+            padding: 2rem;
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .test-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .test-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .test-icon {
+            width: 24px;
+            height: 24px;
+            color: #1A2B6C;
+        }
+        
+        .test-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .info-item {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #1A2B6C;
+        }
+        
+        .info-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .no-schedule {
+            text-align: center;
+            padding: 3rem;
+            color: #718096;
+        }
+        
+        .no-schedule-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            opacity: 0.5;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #1A2B6C 0%, #152347 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 43, 108, 0.3);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #1A2B6C;
+            border: 2px solid #1A2B6C;
+        }
+        
+        .btn-secondary:hover {
+            background: #1A2B6C;
+            color: white;
+        }
+        
+        .footer-contact {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, rgba(26, 43, 108, 0.05) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(26, 43, 108, 0.1);
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 12px 0;
+            padding: 8px 16px;
+            color: #1A2B6C;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: rgba(26, 43, 108, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .contact-icon {
+            width: 20px;
+            height: 20px;
+            color: #1A2B6C;
+            flex-shrink: 0;
+        }
+
+        .contact-item a {
+            color: #1A2B6C;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .contact-item a:hover {
+            color: #152347;
+            text-decoration: underline;
+        }
+
+        .contact-item span {
+            font-weight: 500;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        .status-scheduled {
+            background: #e6fffa;
+            color: #0d9488;
+        }
+        
+        .status-upcoming {
+            background: #fef3cd;
+            color: #92400e;
+        }
+        
+        .status-completed {
+            background: #ecfdf5;
+            color: #059669;
+        }
+        
+        @media (max-width: 768px) {
+            .test-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="test-details-container">
+        <div class="details-card">
+            <div class="card-header">
+                <h1>Your IELTS Test Schedule</h1>
+                <p>Complete details of your scheduled tests</p>
+            </div>
+            
+            <div class="card-content" id="cardContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="./profile.html" class="btn btn-secondary">Back to Profile</a>
+        </div>
+        
+        <div class="footer-contact">
+            <h4 style="color: #1A2B6C; margin-bottom: 15px;">Contact Pretest Center</h4>
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span>+998 77 101 5900</span>
+            </div>
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                <span>+998 77 101 6900</span>
+            </div>
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                <a href="mailto:suxrob_erkabayoff@yahoo.com">suxrob_erkabayoff@yahoo.com</a>
+            </div>
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="12" fill="#0088CC"/>
+                    <path d="M9.78 18.65l.28-4.23 7.68-6.92c-.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z" fill="white"/>
+                </svg>
+                <a href="https://t.me/pretest_uzbekistan" target="_blank">@pretest_uzbekistan</a>
+            </div>
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="instagram-gradient-details" cx="0.5" cy="1" r="1">
+                            <stop offset="0%" stop-color="#FFD93D"/>
+                            <stop offset="30%" stop-color="#FF6B35"/>
+                            <stop offset="70%" stop-color="#E91E63"/>
+                            <stop offset="100%" stop-color="#8E24AA"/>
+                        </radialGradient>
+                    </defs>
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="url(#instagram-gradient-details)"/>
+                    <path d="M8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0z" fill="none" stroke="white" stroke-width="2"/>
+                    <circle cx="17.5" cy="6.5" r="1.5" fill="white"/>
+                </svg>
+                <a href="https://www.instagram.com/pretest_uzbekistan?igsh=MTIyb2ozbmNrejJpcQ%3D%3D&utm_source=qr" target="_blank">@pretest_uzbekistan</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTestDetails();
+        });
+
+        function loadTestDetails() {
+            const currentUser = apiClient.getCurrentUser();
+            const cardContent = document.getElementById('cardContent');
+            if (!currentUser) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            if (!currentUser.testSchedule) {
+                // No schedule found
+                cardContent.innerHTML = `
+                    <div class="no-schedule">
+                        <svg class="no-schedule-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <h3>No Test Scheduled</h3>
+                        <p>You haven't scheduled your IELTS test yet. Please contact the test center to schedule your test.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Has schedule - show details
+            const schedule = currentUser.testSchedule;
+
+            const getStatus = (date, time) => {
+                if (!date || !time) return { class: 'status-scheduled', text: 'Scheduled' };
+                
+                const testDateTime = new Date(`${date}T${time}`);
+                const now = new Date();
+                
+                if (testDateTime < now) {
+                    return { class: 'status-completed', text: 'Completed' };
+                } else if (testDateTime.toDateString() === now.toDateString()) {
+                    return { class: 'status-upcoming', text: 'Today' };
+                } else {
+                    return { class: 'status-scheduled', text: 'Scheduled' };
+                }
+            };
+
+            const formatDate = (date) => {
+                if (!date) return 'Not set';
+                return new Date(date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            const formatTime = (time) => {
+                if (!time) return 'Not set';
+                return time;
+            };
+
+            const mainTestStatus = getStatus(schedule.mainTest?.date, schedule.mainTest?.time);
+            const speakingTestStatus = getStatus(schedule.speakingTest?.date, schedule.speakingTest?.time);
+
+            cardContent.innerHTML = `
+                <div class="test-section">
+                    <div class="test-title">
+                        <svg class="test-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        Main Test (Reading, Writing, Listening)
+                        <span class="status-badge ${mainTestStatus.class}">${mainTestStatus.text}</span>
+                    </div>
+                    
+                    <div class="test-info">
+                        <div class="info-item">
+                            <div class="info-label">Date</div>
+                            <div class="info-value">${formatDate(schedule.mainTest?.date)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Time</div>
+                            <div class="info-value">${formatTime(schedule.mainTest?.time)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Duration</div>
+                            <div class="info-value">3 hours</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-section">
+                    <div class="test-title">
+                        <svg class="test-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                        Speaking Test
+                        <span class="status-badge ${speakingTestStatus.class}">${speakingTestStatus.text}</span>
+                    </div>
+                    
+                    <div class="test-info">
+                        <div class="info-item">
+                            <div class="info-label">Date</div>
+                            <div class="info-value">${formatDate(schedule.speakingTest?.date)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Time</div>
+                            <div class="info-value">${formatTime(schedule.speakingTest?.time)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Duration</div>
+                            <div class="info-value">15-20 minutes</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${schedule.notes ? `
+                <div class="test-section">
+                    <div class="test-title">
+                        <svg class="test-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                        Additional Notes
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-value">${schedule.notes}</div>
+                    </div>
+                </div>
+                ` : ''}
+            `;
+        }
+    </script>
+</body>
+</html>
