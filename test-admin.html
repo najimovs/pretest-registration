@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Admin Panel</title>
+</head>
+<body>
+    <h1>Test Admin Panel Loading</h1>
+    <div id="status">Testing...</div>
+    <button onclick="testLogout()">Test Logout Function</button>
+    <button onclick="testAPI()">Test API Call</button>
+    <div id="results"></div>
+
+    <script>
+        // Test if we can load the API client
+        console.log('Loading test script...');
+
+        function testLogout() {
+            console.log('Testing logout function...');
+            localStorage.setItem('adminSession', 'true'); // Set session first
+            if (typeof adminLogout === 'function') {
+                document.getElementById('status').innerHTML = 'Logout function exists and callable';
+            } else {
+                document.getElementById('status').innerHTML = 'ERROR: adminLogout function not found';
+            }
+        }
+
+        async function testAPI() {
+            console.log('Testing API call...');
+            try {
+                const response = await fetch('http://localhost:8000/api/registrations/all');
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `API Works! Found ${data.data.registrations.length} registrations`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `API Error: ${error.message}`;
+            }
+        }
+
+        // Set admin session for testing
+        localStorage.setItem('adminSession', 'true');
+        document.getElementById('status').innerHTML = 'Test page loaded successfully';
+    </script>
+
+    <!-- Load the admin scripts -->
+    <script src="admin-panel/src/js/api-config.js"></script>
+    <script src="admin-panel/src/js/admin-dashboard.js"></script>
+</body>
+</html>
