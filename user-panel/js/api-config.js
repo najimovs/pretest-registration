@@ -1,7 +1,7 @@
 // API Configuration and Client
 class APIClient {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api';
+        this.baseURL = 'https://pretest-registration.onrender.com/api';
         this.isOfflineMode = false; // Now using real backend
     }
 
