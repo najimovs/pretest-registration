@@ -3,7 +3,7 @@ const DEPLOYMENT_CONFIG = {
     production: {
         BACKEND_URL: 'https://pretest-registration.onrender.com',
         ADMIN_PANEL_URL: 'https://whimsical-sprite-8f17d6.netlify.app',
-        USER_PANEL_URL: 'https://pretest-registration-j57f.vercel.app'
+        USER_PANEL_URL: 'https://fantastic-seahorse-9ee1ac.netlify.app'
     },
     development: {
         BACKEND_URL: 'http://localhost:8000',
