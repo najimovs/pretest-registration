@@ -2,18 +2,17 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   root: '.',
-  publicDir: 'user/assets',
+  publicDir: 'assets',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
       input: {
         main: './index.html',
-        login: './user/pages/login.html',
-        signup: './user/pages/signup.html',
-        profile: './user/pages/profile.html',
-        schedule: './user/pages/ofline-schedule.html',
-        admin: './admin/index.html'
+        login: './pages/login.html',
+        signup: './pages/signup.html',
+        profile: './pages/profile.html',
+        schedule: './pages/ofline-schedule.html'
       }
     }
   },
