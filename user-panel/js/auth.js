@@ -243,14 +243,36 @@ async function handleLogin(e) {
         });
         
         if (response.success) {
-            // Store user data
+            // Store user data and registration info
             localStorage.setItem('currentUser', JSON.stringify(response.data.user));
-            showToast('Login successful!');
-            
-            // Redirect to dashboard after toast
-            setTimeout(() => {
-                window.location.href = './profile.html';
-            }, 1500);
+            localStorage.setItem('currentRegistration', JSON.stringify(response.data.registration));
+
+            // Check if user has scheduled test
+            const hasScheduledTest = response.data.registration.schedule &&
+                response.data.registration.schedule.mainTest &&
+                response.data.registration.schedule.mainTest.date;
+
+            if (hasScheduledTest) {
+                // User has scheduled test - store the test data and redirect to profile
+                const testData = {
+                    mainTest: response.data.registration.schedule.mainTest,
+                    speakingTest: response.data.registration.schedule.speakingTest
+                };
+                localStorage.setItem('offlineTestData', JSON.stringify(testData));
+
+                showToast('Welcome back! Your test is scheduled.');
+
+                setTimeout(() => {
+                    // Redirect to profile page
+                    window.location.href = './profile.html';
+                }, 1500);
+            } else {
+                showToast('Login successful!');
+
+                setTimeout(() => {
+                    window.location.href = './profile.html';
+                }, 1500);
+            }
         } else {
             showFormError(response.message || 'Login failed');
         }

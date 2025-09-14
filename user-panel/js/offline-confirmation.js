@@ -80,7 +80,7 @@ function saveBookingToUserData() {
                 time: scheduleData.speakingTest.time
             },
             paymentMethod: scheduleData.paymentMethod,
-            amount: 79000,
+            amount: 0,
             currency: 'UZS',
             status: 'confirmed',
             bookedAt: new Date().toISOString()

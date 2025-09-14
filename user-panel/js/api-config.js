@@ -63,6 +63,38 @@ class APIClient {
         return this.request('/health');
     }
 
+    // Authentication methods
+    async login(credentials) {
+        // For the user panel, we'll check if user exists in registrations
+        // This is a simple implementation - in a real app, you'd have proper auth endpoints
+        try {
+            const response = await this.request('/registrations/all');
+            const registrations = response.data.registrations;
+
+            // Find user by phone
+            const userRegistration = registrations.find(reg =>
+                reg.user.phone === credentials.phone
+            );
+
+            if (!userRegistration) {
+                throw new Error('User not found. Please register first.');
+            }
+
+            // In a real app, you'd verify password with backend
+            // For now, we'll just return the user data
+            return {
+                success: true,
+                message: 'Login successful',
+                data: {
+                    user: userRegistration.user,
+                    registration: userRegistration
+                }
+            };
+        } catch (error) {
+            throw new Error(error.message || 'Login failed');
+        }
+    }
+
     // Legacy methods for backward compatibility
     async register(userData) {
         return this.createRegistration({

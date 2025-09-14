@@ -161,7 +161,6 @@ function showOfflineTestDetails(scheduleData, isRestricted = false) {
                     </div>
                     <div class="test-status">
                         <p><strong>Status:</strong> <span class="status-scheduled">Scheduled</span></p>
-                        <p><strong>Payment:</strong> Completed (79,000 UZS)</p>
                     </div>
                 </div>
                 <div class="modal-buttons">
@@ -612,22 +611,61 @@ function showCustomAlert(message, type = 'error', title = null) {
 // Navigation functions
 function scheduleTest() {
     const currentUser = apiClient.getCurrentUser();
-    
+
     if (!currentUser) {
         window.location.href = './login.html';
         return;
     }
-    
-    // Check if user has an active test scheduled
+
+    // Check registration data from localStorage
+    const currentRegistration = localStorage.getItem('currentRegistration');
+    if (currentRegistration) {
+        try {
+            const registration = JSON.parse(currentRegistration);
+            const schedule = registration.schedule;
+
+            // Check if user has an active test scheduled
+            if (schedule && schedule.mainTest && schedule.mainTest.date) {
+                const mainTestDate = new Date(schedule.mainTest.date);
+                const speakingTestDate = new Date(schedule.speakingTest?.date || schedule.mainTest.date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Get the later date between main and speaking test
+                const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
+
+                if (lastTestDate >= today) {
+                    // Test dates haven't passed yet - show restriction
+                    const mainDateStr = mainTestDate.toLocaleDateString('en-GB');
+                    const speakingDateStr = speakingTestDate.toLocaleDateString('en-GB');
+
+                    showCustomAlert(
+                        'Test Already Scheduled',
+                        `You already have a scheduled IELTS test:\n\n` +
+                        `📝 Main Test: ${mainDateStr} at ${schedule.mainTest.time}\n` +
+                        `🗣️ Speaking: ${speakingDateStr} at ${schedule.speakingTest?.time || schedule.mainTest.time}\n\n` +
+                        `Please complete your current test before scheduling a new one.`,
+                        'View Test Details',
+                        () => viewTestDetails()
+                    );
+                    return;
+                }
+            }
+        } catch (error) {
+            console.error('Error parsing registration data:', error);
+        }
+    }
+
+    // Also check legacy testSchedule format
     if (currentUser.testSchedule) {
         const mainTestDate = new Date(currentUser.testSchedule.mainTest?.date);
         const speakingTestDate = new Date(currentUser.testSchedule.speakingTest?.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         // Get the later date between main and speaking test
         const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-        
+
         if (lastTestDate >= today) {
             // Test dates haven't passed yet - show alert
             showCustomAlert(
@@ -639,12 +677,42 @@ function scheduleTest() {
             return;
         }
     }
-    
+
     // No active test or test dates have passed - allow scheduling
     window.location.href = './ofline-schedule.html';
 }
 
 function viewTestDetails() {
+    // Check if user has scheduled test data
+    const currentRegistration = localStorage.getItem('currentRegistration');
+    if (currentRegistration) {
+        try {
+            const registration = JSON.parse(currentRegistration);
+            const schedule = registration.schedule;
+
+            if (schedule && schedule.mainTest && schedule.mainTest.date) {
+                // User has scheduled test - show details modal
+                showOfflineTestDetails(schedule, false); // false = no restriction, just view
+                return;
+            }
+        } catch (error) {
+            console.error('Error parsing registration data:', error);
+        }
+    }
+
+    // Check legacy format
+    const offlineTestData = localStorage.getItem('offlineTestData');
+    if (offlineTestData) {
+        try {
+            const scheduleData = JSON.parse(offlineTestData);
+            showOfflineTestDetails(scheduleData, false);
+            return;
+        } catch (error) {
+            console.error('Error parsing offline test data:', error);
+        }
+    }
+
+    // No test data found - redirect to test details page
     window.location.href = './test-details.html';
 }
 
@@ -711,34 +779,67 @@ function closeProfileAlert(hasCallback = false) {
 function updateScheduleButton() {
     const currentUser = apiClient.getCurrentUser();
     const scheduleCard = document.querySelector('.action-card[onclick="scheduleTest()"]');
-    
+
     if (!scheduleCard || !currentUser) return;
-    
+
     const cardTitle = scheduleCard.querySelector('.card-title');
     const cardDescription = scheduleCard.querySelector('.card-description');
     const cardButton = scheduleCard.querySelector('.card-button');
-    
-    if (currentUser.testSchedule) {
+
+    // Check registration data from localStorage first
+    const currentRegistration = localStorage.getItem('currentRegistration');
+    let hasActiveTest = false;
+
+    if (currentRegistration) {
+        try {
+            const registration = JSON.parse(currentRegistration);
+            const schedule = registration.schedule;
+
+            if (schedule && schedule.mainTest && schedule.mainTest.date) {
+                const mainTestDate = new Date(schedule.mainTest.date);
+                const speakingTestDate = new Date(schedule.speakingTest?.date || schedule.mainTest.date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
+
+                if (lastTestDate >= today) {
+                    hasActiveTest = true;
+                    // User has active test scheduled
+                    cardTitle.textContent = 'Test Scheduled';
+                    cardDescription.textContent = 'You have an active IELTS test scheduled';
+                    cardButton.textContent = 'View Details';
+                    cardButton.style.backgroundColor = '#F59E0B';
+                }
+            }
+        } catch (error) {
+            console.error('Error parsing registration data:', error);
+        }
+    }
+
+    // Also check legacy testSchedule format if no registration data
+    if (!hasActiveTest && currentUser.testSchedule) {
         const mainTestDate = new Date(currentUser.testSchedule.mainTest?.date);
         const speakingTestDate = new Date(currentUser.testSchedule.speakingTest?.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
-        // Get the later date between main and speaking test
+
         const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-        
+
         if (lastTestDate >= today) {
-            // User has active test scheduled - keep normal colors but disable functionality
+            hasActiveTest = true;
             cardTitle.textContent = 'Test Scheduled';
             cardDescription.textContent = 'You have an active IELTS test scheduled';
             cardButton.textContent = 'View Details';
-            // Keep normal colors, functionality will be restricted in scheduleTest()
-        } else {
-            // Test dates have passed - allow new scheduling
-            cardTitle.textContent = 'Schedule New Test';
-            cardDescription.textContent = 'Schedule your next IELTS exam';
-            cardButton.textContent = 'Schedule now';
         }
+    }
+
+    // If no active test, keep default text
+    if (!hasActiveTest) {
+        cardTitle.textContent = 'Schedule Test';
+        cardDescription.textContent = 'Book your offline IELTS exam slots';
+        cardButton.textContent = 'Schedule now';
+        cardButton.style.backgroundColor = ''; // Reset to default
     }
 }
 
