@@ -1,7 +1,7 @@
 // API Configuration and Client
 class APIClient {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api';
+        this.baseURL = 'https://pretest-registration.onrender.com/api';
         this.isOfflineMode = false; // Now using real backend
     }
 
@@ -219,7 +219,14 @@ class APIClient {
         }
 
         try {
-            const response = await fetch(`${this.baseURL}/registrations/all`);
+            const response = await fetch(`${this.baseURL}/registrations/all`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -228,7 +235,9 @@ class APIClient {
 
             return data;
         } catch (error) {
-            throw error;
+            console.warn('Backend unavailable, falling back to mock data:', error);
+            this.isOfflineMode = true;
+            return this.mockGetAllRegistrations();
         }
     }
 
