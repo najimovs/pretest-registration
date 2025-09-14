@@ -14,15 +14,25 @@ class AdminDashboard {
     async loadRegistrations() {
         try {
             const response = await apiClient.getAllRegistrations();
-            this.registrations = response.data.registrations;
+            // Filter to only show scheduled registrations and sort by creation date (oldest first, newest last)
+            this.registrations = response.data.registrations
+                .filter(r => r.status === 'scheduled')
+                .sort((a, b) => {
+                    const dateA = new Date(a.createdAt);
+                    const dateB = new Date(b.createdAt);
+                    return dateA.getTime() - dateB.getTime(); // Oldest first, newest last
+                });
+            console.log('Loaded scheduled registrations successfully:', this.registrations.length);
         } catch (error) {
             console.error('Failed to load registrations:', error);
             this.registrations = [];
+            this.showError(`Failed to load registrations: ${error.message}`);
         }
     }
 
     updateStatistics() {
-        const scheduled = this.registrations.filter(r => r.status === 'scheduled').length;
+        // Since we're only showing scheduled registrations, the count is just the length
+        const scheduled = this.registrations.length;
         document.getElementById('scheduledTests').textContent = scheduled;
     }
 
@@ -42,13 +52,13 @@ class AdminDashboard {
         table.style.display = 'table';
         tbody.innerHTML = '';
 
-        this.registrations.forEach(registration => {
-            const row = this.createTableRow(registration);
+        this.registrations.forEach((registration, index) => {
+            const row = this.createTableRow(registration, index + 1);
             tbody.appendChild(row);
         });
     }
 
-    createTableRow(registration) {
+    createTableRow(registration, rowNumber) {
         const row = document.createElement('tr');
         const user = registration.user;
         const schedule = registration.schedule;
@@ -69,6 +79,7 @@ class AdminDashboard {
         };
 
         row.innerHTML = `
+            <td style="font-weight: bold; text-align: center;">${rowNumber}</td>
             <td>${user.firstName} ${user.lastName}</td>
             <td>${user.phone}</td>
             <td>${schedule ? formatDateTime(schedule.mainTest?.date, schedule.mainTest?.time) : 'Not scheduled'}</td>
@@ -86,7 +97,8 @@ class AdminDashboard {
             return;
         }
 
-        const data = this.registrations.map(reg => ({
+        const data = this.registrations.map((reg, index) => ({
+            '#': index + 1,
             'Student Name': `${reg.user.firstName} ${reg.user.lastName}`,
             'Phone': reg.user.phone,
             'Email': reg.user.email,
@@ -132,6 +144,7 @@ class AdminDashboard {
                 <table>
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th>Student Name</th>
                             <th>Phone</th>
                             <th>Main Test</th>
@@ -143,7 +156,7 @@ class AdminDashboard {
                     <tbody>
         `;
 
-        this.registrations.forEach(reg => {
+        this.registrations.forEach((reg, index) => {
             const formatDateTime = (dateStr, timeStr) => {
                 if (!dateStr || !timeStr) return 'Not scheduled';
                 const date = new Date(dateStr);
@@ -152,6 +165,7 @@ class AdminDashboard {
 
             htmlContent += `
                 <tr>
+                    <td>${index + 1}</td>
                     <td>${reg.user.firstName} ${reg.user.lastName}</td>
                     <td>${reg.user.phone}</td>
                     <td>${reg.schedule ? formatDateTime(reg.schedule.mainTest?.date, reg.schedule.mainTest?.time) : 'Not scheduled'}</td>
@@ -209,6 +223,26 @@ class AdminDashboard {
                 }
             }, 300);
         }, 3000);
+    }
+
+    showError(message) {
+        this.showToast(message, 'error');
+
+        // Also show error in the table area
+        const tbody = document.getElementById('registrationsBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #ef4444;">
+                        <div style="font-size: 18px; margin-bottom: 10px;">⚠️ Error Loading Data</div>
+                        <div style="font-size: 14px;">${message}</div>
+                        <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            Retry
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 

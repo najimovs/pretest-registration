@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin API</title>
+</head>
+<body>
+    <h1>Admin API Test</h1>
+    <button onclick="testAPI()">Test Registration API</button>
+    <div id="result"></div>
+
+    <script src="admin-panel/src/js/api-config.js"></script>
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Loading...';
+
+            try {
+                console.log('Testing API...');
+                const response = await apiClient.getAllRegistrations();
+                console.log('API Response:', response);
+
+                resultDiv.innerHTML = `
+                    <h3>Success!</h3>
+                    <p>Loaded ${response.data.registrations.length} registrations</p>
+                    <pre>${JSON.stringify(response.data.registrations.slice(0, 3), null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('API Error:', error);
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">Error!</h3>
+                    <p>${error.message}</p>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

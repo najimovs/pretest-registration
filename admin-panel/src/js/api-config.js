@@ -214,17 +214,14 @@ class APIClient {
 
     // Get all registrations (for admin)
     async getAllRegistrations() {
-        if (this.isOfflineMode) {
-            return this.mockGetAllRegistrations();
-        }
-
         try {
             const response = await fetch(`${this.baseURL}/registrations/all`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                }
+                },
+                timeout: 10000 // 10 second timeout
             });
 
             const data = await response.json();
@@ -233,11 +230,14 @@ class APIClient {
                 throw new Error(data.message || 'Failed to fetch registrations');
             }
 
+            console.log('Successfully fetched registrations:', data.data.registrations.length);
             return data;
         } catch (error) {
-            console.warn('Backend unavailable, falling back to mock data:', error);
-            this.isOfflineMode = true;
-            return this.mockGetAllRegistrations();
+            console.error('Failed to fetch registrations from backend:', error);
+
+            // Instead of falling back to empty mock data, throw the error
+            // so the admin dashboard can handle it properly
+            throw new Error(`Backend connection failed: ${error.message}`);
         }
     }
 
