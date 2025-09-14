@@ -12,6 +12,15 @@ const DEPLOYMENT_CONFIG = {
     }
 };
 
+// Navigation helper functions
+window.navigateToUserPanel = function() {
+    window.open(config.USER_PANEL_URL, '_blank');
+};
+
+window.navigateToAdminPanel = function() {
+    window.open(config.ADMIN_PANEL_URL, '_blank');
+};
+
 // Auto-detect environment
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const config = isDevelopment ? DEPLOYMENT_CONFIG.development : DEPLOYMENT_CONFIG.production;
