@@ -8,8 +8,8 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: './index.html',
-        login: './login.html'
+        main: './src/pages/index.html',
+        login: './src/pages/login.html'
       }
     }
   },
