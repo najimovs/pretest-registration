@@ -254,12 +254,15 @@ async function proceedToTestDetails() {
     try {
         // Get current user to get user data for backend
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        console.log('DEBUG: Current user data:', currentUser);
 
         // Check if user exists (use firstName as indicator since id might not exist)
         if (currentUser.firstName && currentUser.phone) {
+            console.log('DEBUG: User validation passed, sending to backend...');
+
             try {
                 // Send registration data to backend
-                const response = await apiClient.post('/registrations/register', {
+                const requestData = {
                     user: {
                         firstName: currentUser.firstName,
                         lastName: currentUser.lastName,
@@ -267,10 +270,14 @@ async function proceedToTestDetails() {
                         email: currentUser.email || `${currentUser.phone.replace('+', '')}@temp.pretest.uz`
                     },
                     schedule: scheduleData
-                });
+                };
+                console.log('DEBUG: Sending request data:', requestData);
+
+                const response = await apiClient.post('/registrations/register', requestData);
+                console.log('DEBUG: Backend response:', response);
 
                 if (response.success) {
-                    console.log('Registration sent to backend successfully:', response);
+                    console.log('✅ Registration sent to backend successfully!');
 
                     // Save schedule to localStorage (as fallback and for frontend)
                     localStorage.setItem('testSchedule', JSON.stringify(scheduleData));
@@ -285,14 +292,18 @@ async function proceedToTestDetails() {
 
                     return; // Exit early since backend save was successful
                 } else {
-                    console.warn('Backend registration failed:', response.message);
+                    console.error('❌ Backend registration failed:', response.message);
                 }
             } catch (backendError) {
-                console.error('Failed to send registration to backend:', backendError);
+                console.error('❌ Exception during backend call:', backendError);
                 // Fall through to localStorage approach if backend fails
             }
         } else {
-            console.warn('No current user found or incomplete user data');
+            console.warn('❌ No current user found or incomplete user data:', {
+                hasFirstName: !!currentUser.firstName,
+                hasPhone: !!currentUser.phone,
+                currentUser: currentUser
+            });
         }
 
         // Fallback: Save schedule to localStorage only if backend failed or no user

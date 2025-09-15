@@ -1,0 +1,155 @@
+
+        <!-- Step 3: Payment -->
+        <div class="step" id="step3">
+            <h1 class="page-title">Payment</h1>
+            <div class="payment-section-online">
+                
+                <!-- Total Amount Display -->
+                <div class="total-amount-card-online">
+                    <div class="amount-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="amount-details">
+                        <h2 class="total-label">Total Amount</h2>
+                        <div class="total-price-online" id="total-price-display">0 UZS</div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="payment-methods-section-online">
+                    <h3>Choose a payment method</h3>
+                    <div class="payment-options-online">
+                        <div class="payment-option-online" data-payment="click">
+                            <div class="payment-option-content">
+                                <img src="../../assets/images/click-logo-horizantal.png" alt="Click" class="payment-logo">
+                                <div class="payment-option-text">
+                                    <h4>Click</h4>
+                                    <p>Pay with Click</p>
+                                </div>
+                            </div>
+                            <div class="payment-radio">
+                                <input type="radio" name="payment-method-online" id="click-radio-online" value="click">
+                                <label for="click-radio-online"></label>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-option-online" data-payment="payme">
+                            <div class="payment-option-content">
+                                <img src="../../assets/images/payme.png" alt="Payme" class="payment-logo">
+                                <div class="payment-option-text">
+                                    <h4>Payme</h4>
+                                    <p>Pay with Payme</p>
+                                </div>
+                            </div>
+                            <div class="payment-radio">
+                                <input type="radio" name="payment-method-online" id="payme-radio-online" value="payme">
+                                <label for="payme-radio-online"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="payment-details-online">
+                    <h3>Payment Details</h3>
+                    <div class="summary-card-online">
+                        <div class="summary-row">
+                            <span class="summary-label">Type of testing:</span>
+                            <span class="summary-value" id="selected-type">Online</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Tariff:</span>
+                            <span class="summary-value" id="selected-plan">Premium</span>
+                        </div>
+                        <div class="summary-row total-row">
+                            <span class="summary-label">Total:</span>
+                            <span class="summary-value total" id="total-price">100,000 UZS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="previousStep()">Cancel</button>
+                <button class="btn btn-primary" onclick="nextStep()" id="next-btn-3" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Success -->
+        <div class="step" id="step4">
+            <div class="success-section-online">
+                <div class="success-animation">
+                    <div class="success-checkmark">
+                        <svg class="checkmark" width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="40" cy="40" r="38" stroke="#10B981" stroke-width="4" fill="none" opacity="0.2"/>
+                            <circle cx="40" cy="40" r="38" stroke="#10B981" stroke-width="4" fill="none" 
+                                   stroke-dasharray="238.76" stroke-dashoffset="238.76" stroke-linecap="round">
+                                <animate attributeName="stroke-dashoffset" dur="1s" values="238.76;0" fill="freeze"/>
+                            </circle>
+                            <path d="M20 40L32 52L60 24" stroke="#10B981" stroke-width="4" stroke-linecap="round" 
+                                  stroke-linejoin="round" fill="none" stroke-dasharray="50" stroke-dashoffset="50">
+                                <animate attributeName="stroke-dashoffset" dur="0.8s" begin="1s" values="50;0" fill="freeze"/>
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="success-content-online">
+                    <h1 class="success-title-online">Congratulations!</h1>
+                    <p class="success-message-online">
+                        Your IELTS online mock test has been successfully purchased. You can now start practicing and improve your English skills!
+                    </p>
+                    
+                    <div class="purchase-summary">
+                        <h3>Purchase Summary</h3>
+                        <div class="summary-card-success">
+                            <div class="summary-row">
+                                <span class="label">Type:</span>
+                                <span class="value" id="success-type">Online</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="label">Plan:</span>
+                                <span class="value" id="success-plan">Premium</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="label">Payment Method:</span>
+                                <span class="value" id="success-payment">Not selected</span>
+                            </div>
+                            <div class="summary-row total-payment-row">
+                                <span class="label">Total Paid:</span>
+                                <span class="value" id="success-total">100,000 UZS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="success-notes">
+                        <div class="note-card-success">
+                            <div class="note-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+                                    <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                            <div class="note-content">
+                                <h4>What's Next?</h4>
+                                <ul>
+                                    <li>Start the test</li>
+                                    <li>Get instant scores for Reading & Listening</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="success-actions">
+                        <button class="btn btn-primary" onclick="startTest()">Start Your Test</button>
+                        <button class="btn btn-secondary" onclick="goToProfile()">Go to Your Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

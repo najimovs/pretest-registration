@@ -51,7 +51,7 @@ router.post('/register', async (req, res) => {
 // Get all registrations (for admin)
 router.get('/all', async (req, res) => {
   try {
-    const registrations = await Registration.find().sort({ createdAt: -1 });
+    const registrations = await Registration.find().sort({ createdAt: 1 });
 
     res.json({
       success: true,

@@ -103,6 +103,13 @@ class APIClient {
         });
     }
 
+    async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
     async saveTestSchedule(userId, scheduleData) {
         // For existing users, we need to update registration
         // This will need to be implemented based on your flow

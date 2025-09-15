@@ -2,6 +2,8 @@
 class AdminDashboard {
     constructor() {
         this.registrations = [];
+        this.refreshInterval = null;
+        this.nextRowNumber = 1; // Track the next row number to assign
         this.init();
     }
 
@@ -9,6 +11,24 @@ class AdminDashboard {
         await this.loadRegistrations();
         this.updateStatistics();
         this.populateTable();
+        this.startAutoRefresh();
+    }
+
+    startAutoRefresh() {
+        // Refresh every 30 seconds to show new registrations
+        this.refreshInterval = setInterval(async () => {
+            console.log('Auto-refreshing registrations...');
+            await this.loadRegistrations();
+            this.updateStatistics();
+            this.populateTable();
+        }, 30000); // 30 seconds
+    }
+
+    stopAutoRefresh() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
+        }
     }
 
     async loadRegistrations() {
@@ -16,9 +36,12 @@ class AdminDashboard {
             const response = await apiClient.getAllRegistrations();
             console.log('All registrations from API:', response.data.registrations);
 
+            // Store previous registrations to preserve row numbers
+            const previousRegistrations = [...this.registrations];
+
             // Show all registrations that have a test scheduled
             // Handle both old format (mainTest/speakingTest) and new format (date/time)
-            this.registrations = response.data.registrations
+            const newFilteredRegistrations = response.data.registrations
                 .filter(r => {
                     if (r.schedule) {
                         // New format: check if date and time exist directly
@@ -35,8 +58,20 @@ class AdminDashboard {
                 .sort((a, b) => {
                     const dateA = new Date(a.createdAt);
                     const dateB = new Date(b.createdAt);
-                    return dateB.getTime() - dateA.getTime(); // Newest first, oldest last
+                    return dateA.getTime() - dateB.getTime(); // Oldest first, newest last
                 });
+
+            // Preserve existing row numbers and assign new ones for new registrations
+            this.registrations = newFilteredRegistrations.map(registration => {
+                const existing = previousRegistrations.find(prev => prev._id === registration._id);
+                if (existing) {
+                    // Keep existing row number
+                    registration.rowNumber = existing.rowNumber;
+                }
+                // New registrations will get row numbers assigned in populateTable
+                return registration;
+            });
+
             console.log('Filtered registrations with scheduled tests:', this.registrations.length);
         } catch (error) {
             console.error('Failed to load registrations:', error);
@@ -67,8 +102,14 @@ class AdminDashboard {
         table.style.display = 'table';
         tbody.innerHTML = '';
 
-        this.registrations.forEach((registration, index) => {
-            const row = this.createTableRow(registration, index + 1);
+        // Assign continuous row numbers to new registrations
+        this.registrations.forEach((registration) => {
+            // If registration doesn't have a row number, assign the next available one
+            if (!registration.rowNumber) {
+                registration.rowNumber = this.nextRowNumber++;
+            }
+
+            const row = this.createTableRow(registration, registration.rowNumber);
             tbody.appendChild(row);
         });
     }
@@ -317,6 +358,17 @@ function adminLogout() {
     window.location.href = 'login.html';
 }
 
+// Manual refresh function
+function refreshDashboard() {
+    if (dashboard) {
+        console.log('Manual refresh triggered...');
+        dashboard.loadRegistrations().then(() => {
+            dashboard.updateStatistics();
+            dashboard.populateTable();
+        });
+    }
+}
+
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Check admin authentication
@@ -327,4 +379,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     dashboard = new AdminDashboard();
+});
+
+// Stop auto-refresh when page is unloaded
+window.addEventListener('beforeunload', () => {
+    if (dashboard) {
+        dashboard.stopAutoRefresh();
+    }
 });
