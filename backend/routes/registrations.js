@@ -8,16 +8,22 @@ router.post('/register', async (req, res) => {
   try {
     const { user, schedule } = req.body;
 
+    // Debug logging
+    console.log('Received registration request:', { user: user.firstName, schedule });
+
     const registration = new Registration({
       user,
       schedule: schedule || {
-        mainTest: { date: null, time: null },
-        speakingTest: { date: null, time: null }
+        date: null,
+        time: null
       },
-      status: schedule ? 'scheduled' : 'pending'
+      status: schedule && schedule.date ? 'scheduled' : 'pending'
     });
 
     await registration.save();
+
+    // Debug: Log what was actually saved
+    console.log('Saved registration with schedule:', registration.schedule);
 
     res.status(201).json({
       success: true,

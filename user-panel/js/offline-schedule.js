@@ -42,14 +42,7 @@ let mainTestSchedule = {
     time: null
 };
 
-let speakingSchedule = {
-    date: null,
-    time: null
-};
-
 let currentMainMonth = new Date();
-let currentSpeakingMonth = new Date();
-let currentStep = 1; // 1 = main test, 2 = speaking test
 
 // Generate time slots from 9:00 to 18:00
 function generateTimeSlots() {
@@ -67,39 +60,15 @@ function isValidDate(date) {
 }
 
 // Check if date is within allowed booking period (14 days for main test)
-function isDateWithinBookingPeriod(date, isForSpeaking = false) {
+function isDateWithinBookingPeriod(date) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const maxDays = isForSpeaking ? 17 : 14; // 17 days for speaking (14+3), 14 for main test
+
+    const maxDays = 14; // 14 days for main test
     const maxDate = new Date(today);
     maxDate.setDate(today.getDate() + maxDays);
-    
+
     return date >= today && date <= maxDate;
-}
-
-// Check if speaking date is within allowed range (3 days before/after main test)
-function isSpeakingDateValid(speakingDate, mainDate) {
-    const timeDiff = Math.abs(speakingDate.getTime() - mainDate.getTime());
-    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    return daysDiff <= 3;
-}
-
-// Check if speaking time conflicts with main test (same day + during 3-hour test duration)
-function isSpeakingTimeValid(speakingTime, mainTime, speakingDate, mainDate) {
-    // If different dates, no time conflict
-    if (speakingDate.toDateString() !== mainDate.toDateString()) {
-        return true;
-    }
-    
-    // Same date - speaking cannot be during the 3-hour main test period
-    const mainHour = parseInt(mainTime.split(':')[0]);
-    const speakingHour = parseInt(speakingTime.split(':')[0]);
-    
-    // Block speaking during main test hours (mainHour, mainHour+1, mainHour+2, mainHour+3)
-    // 3-hour test: if starts at 12:00, blocks 12:00, 13:00, 14:00, 15:00
-    // Allow speaking before main test OR after main test completely finishes (mainHour+4 and later)
-    return speakingHour < mainHour || speakingHour > mainHour + 3;
 }
 
 // Format date for display
@@ -114,29 +83,29 @@ function formatDate(date) {
 }
 
 // Generate calendar days
-function generateCalendarDays(date, containerId, isForSpeaking = false) {
+function generateCalendarDays(date, containerId) {
     const container = document.getElementById(containerId);
     const year = date.getFullYear();
     const month = date.getMonth();
-    
+
     // Get first day of month and number of days
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    
+
     // Get the day of week for first day (0 = Sunday, but we want Monday = 0)
     let startDay = firstDay.getDay();
     startDay = startDay === 0 ? 6 : startDay - 1; // Convert Sunday (0) to 6, and shift others
-    
+
     container.innerHTML = '';
-    
+
     // Add empty cells for days before month starts
     for (let i = 0; i < startDay; i++) {
         const emptyDay = document.createElement('div');
         emptyDay.classList.add('calendar-day', 'empty');
         container.appendChild(emptyDay);
     }
-    
+
     // Add days of the month
     const today = new Date();
     for (let day = 1; day <= daysInMonth; day++) {
@@ -144,29 +113,19 @@ function generateCalendarDays(date, containerId, isForSpeaking = false) {
         const dayElement = document.createElement('div');
         dayElement.classList.add('calendar-day');
         dayElement.textContent = day;
-        
-        let isAvailable = false;
-        
-        if (isForSpeaking && mainTestSchedule.date) {
-            // For speaking test, check 3-day range, valid days, and booking period
-            isAvailable = isValidDate(dayDate) && 
-                         dayDate >= today && 
-                         isDateWithinBookingPeriod(dayDate, true) &&
-                         isSpeakingDateValid(dayDate, mainTestSchedule.date);
-        } else {
-            // For main test, check valid days, not in past, and within 14-day booking period
-            isAvailable = isValidDate(dayDate) && 
-                         dayDate >= today && 
-                         isDateWithinBookingPeriod(dayDate, false);
-        }
-        
+
+        // For main test, check valid days, not in past, and within 14-day booking period
+        const isAvailable = isValidDate(dayDate) &&
+                           dayDate >= today &&
+                           isDateWithinBookingPeriod(dayDate);
+
         if (isAvailable) {
             dayElement.classList.add('available');
             dayElement.addEventListener('click', () => selectDate(dayDate, containerId));
         } else {
             dayElement.classList.add('disabled');
         }
-        
+
         container.appendChild(dayElement);
     }
 }
@@ -177,66 +136,45 @@ function selectDate(date, containerId) {
     document.querySelectorAll(`#${containerId} .calendar-day`).forEach(day => {
         day.classList.remove('selected');
     });
-    
+
     // Add selection to clicked date
     event.target.classList.add('selected');
-    
-    // Update schedule object and regenerate time slots
-    if (containerId === 'main-calendar-days') {
-        mainTestSchedule.date = date;
-        updateSelectedInfo('main-selected');
-        checkMainStepComplete();
-    } else {
-        speakingSchedule.date = date;
-        speakingSchedule.time = null; // Reset time selection when date changes
-        updateSelectedInfo('speaking-selected');
-        generateTimeSlotsForSection('speaking'); // Regenerate with conflict checking
-        checkSpeakingStepComplete();
-    }
+
+    // Update schedule object
+    mainTestSchedule.date = date;
+    updateSelectedInfo('main-selected');
+    checkMainStepComplete();
 }
 
 // Select time
-function selectTime(time, sectionType) {
+function selectTime(time) {
     // Remove previous selection
-    document.querySelectorAll(`#${sectionType}-time-slots .time-slot`).forEach(slot => {
+    document.querySelectorAll('#main-time-slots .time-slot').forEach(slot => {
         slot.classList.remove('selected');
     });
-    
+
     // Add selection to clicked time
     event.target.classList.add('selected');
-    
+
     // Update schedule object
-    if (sectionType === 'main') {
-        mainTestSchedule.time = time;
-        updateSelectedInfo('main-selected');
-        checkMainStepComplete();
-    } else {
-        speakingSchedule.time = time;
-        updateSelectedInfo('speaking-selected');
-        checkSpeakingStepComplete();
-    }
+    mainTestSchedule.time = time;
+    updateSelectedInfo('main-selected');
+    checkMainStepComplete();
 }
 
 // Update selected info display
 function updateSelectedInfo(elementId) {
     const element = document.getElementById(elementId);
     const selectedValue = element.querySelector('.selected-value');
-    
-    let schedule;
-    if (elementId === 'main-selected') {
-        schedule = mainTestSchedule;
-    } else {
-        schedule = speakingSchedule;
-    }
-    
-    if (schedule.date && schedule.time) {
-        selectedValue.textContent = `${formatDate(schedule.date)} at ${schedule.time}`;
+
+    if (mainTestSchedule.date && mainTestSchedule.time) {
+        selectedValue.textContent = `${formatDate(mainTestSchedule.date)} at ${mainTestSchedule.time}`;
         selectedValue.style.color = '#10B981';
-    } else if (schedule.date) {
-        selectedValue.textContent = `${formatDate(schedule.date)} - Select time`;
+    } else if (mainTestSchedule.date) {
+        selectedValue.textContent = `${formatDate(mainTestSchedule.date)} - Select time`;
         selectedValue.style.color = '#F59E0B';
-    } else if (schedule.time) {
-        selectedValue.textContent = `${schedule.time} - Select date`;
+    } else if (mainTestSchedule.time) {
+        selectedValue.textContent = `${mainTestSchedule.time} - Select date`;
         selectedValue.style.color = '#F59E0B';
     } else {
         selectedValue.textContent = 'Please select date and time';
@@ -251,173 +189,128 @@ function checkMainStepComplete() {
     nextBtn.disabled = !isComplete;
 }
 
-// Check if speaking step is complete
-function checkSpeakingStepComplete() {
-    const nextBtn = document.getElementById('speaking-next-btn');
-    const isComplete = speakingSchedule.date && speakingSchedule.time;
-    nextBtn.disabled = !isComplete;
-}
-
-// Generate time slots for sections with conflict checking
-function generateTimeSlotsForSection(sectionType) {
-    const container = document.getElementById(`${sectionType}-time-slots`);
+// Generate time slots for main test
+function generateTimeSlotsForSection() {
+    const container = document.getElementById('main-time-slots');
     const timeSlots = generateTimeSlots();
-    
+
     container.innerHTML = '';
-    
+
     timeSlots.forEach(time => {
         const timeElement = document.createElement('div');
         timeElement.classList.add('time-slot');
         timeElement.textContent = time;
-        
-        let isTimeAvailable = true;
-        
-        // For speaking test, check time conflicts
-        if (sectionType === 'speaking' && mainTestSchedule.date && mainTestSchedule.time && speakingSchedule.date) {
-            isTimeAvailable = isSpeakingTimeValid(time, mainTestSchedule.time, speakingSchedule.date, mainTestSchedule.date);
-        }
-        
-        if (isTimeAvailable) {
-            timeElement.addEventListener('click', () => selectTime(time, sectionType));
-        } else {
-            timeElement.classList.add('disabled');
-            timeElement.style.opacity = '0.4';
-            timeElement.style.cursor = 'not-allowed';
-        }
-        
+        timeElement.addEventListener('click', () => selectTime(time));
         container.appendChild(timeElement);
     });
 }
 
 // Navigate months
-function navigateMonth(direction, calendarType) {
+function navigateMonth(direction) {
     const today = new Date();
     const maxMonthsAhead = 1; // Only allow current month and next month
-    
-    if (calendarType === 'main') {
-        const newMonth = new Date(currentMainMonth);
-        newMonth.setMonth(newMonth.getMonth() + direction);
-        
-        // Check if new month is within allowed range
-        const monthsDiff = (newMonth.getFullYear() - today.getFullYear()) * 12 + 
-                          (newMonth.getMonth() - today.getMonth());
-        
-        if (monthsDiff >= 0 && monthsDiff <= maxMonthsAhead) {
-            currentMainMonth = newMonth;
-            updateCalendarDisplay('main');
-        }
-    } else {
-        const newMonth = new Date(currentSpeakingMonth);
-        newMonth.setMonth(newMonth.getMonth() + direction);
-        
-        // Check if new month is within allowed range
-        const monthsDiff = (newMonth.getFullYear() - today.getFullYear()) * 12 + 
-                          (newMonth.getMonth() - today.getMonth());
-        
-        if (monthsDiff >= 0 && monthsDiff <= maxMonthsAhead) {
-            currentSpeakingMonth = newMonth;
-            updateCalendarDisplay('speaking');
-        }
+
+    const newMonth = new Date(currentMainMonth);
+    newMonth.setMonth(newMonth.getMonth() + direction);
+
+    // Check if new month is within allowed range
+    const monthsDiff = (newMonth.getFullYear() - today.getFullYear()) * 12 +
+                      (newMonth.getMonth() - today.getMonth());
+
+    if (monthsDiff >= 0 && monthsDiff <= maxMonthsAhead) {
+        currentMainMonth = newMonth;
+        updateCalendarDisplay();
     }
 }
 
 // Update calendar display
-function updateCalendarDisplay(calendarType) {
-    if (calendarType === 'main') {
-        const monthYearElement = document.getElementById('current-month-year');
-        monthYearElement.textContent = currentMainMonth.toLocaleDateString('en-US', { 
-            month: 'long', 
-            year: 'numeric' 
-        });
-        generateCalendarDays(currentMainMonth, 'main-calendar-days', false);
-    } else {
-        const monthYearElement = document.getElementById('speaking-current-month-year');
-        monthYearElement.textContent = currentSpeakingMonth.toLocaleDateString('en-US', { 
-            month: 'long', 
-            year: 'numeric' 
-        });
-        generateCalendarDays(currentSpeakingMonth, 'speaking-calendar-days', true);
-    }
+function updateCalendarDisplay() {
+    const monthYearElement = document.getElementById('current-month-year');
+    monthYearElement.textContent = currentMainMonth.toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+    });
+    generateCalendarDays(currentMainMonth, 'main-calendar-days');
 }
 
-// Proceed to speaking step
-function proceedToSpeakingStep() {
-    // Hide main step
-    document.getElementById('main-schedule-step').style.display = 'none';
-    
-    // Show speaking step
-    document.getElementById('speaking-schedule-step').style.display = 'block';
-    
-    // Update reminder text
-    const reminderElement = document.getElementById('main-test-reminder');
-    reminderElement.textContent = `${formatDate(mainTestSchedule.date)} at ${mainTestSchedule.time}`;
-    
-    // Set speaking month to same as main test month initially
-    currentSpeakingMonth = new Date(mainTestSchedule.date);
-    updateCalendarDisplay('speaking');
-    generateTimeSlotsForSection('speaking');
-    
-    currentStep = 2;
-}
-
-// Go back to main step
-function backToMainStep() {
-    // Show main step
-    document.getElementById('main-schedule-step').style.display = 'block';
-    
-    // Hide speaking step
-    document.getElementById('speaking-schedule-step').style.display = 'none';
-    
-    currentStep = 1;
-}
-
-// Proceed to save schedule and show test details
+// Proceed to test details (renamed from proceedToSpeakingStep)
 async function proceedToTestDetails() {
-    // Get current user to bind schedule to specific user
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    
-    if (!currentUser.id) {
-        alert('Please log in to schedule your test.');
-        window.location.href = './login.html';
-        return;
-    }
-    
-    // Prepare schedule data
+    // Prepare schedule data (simplified without speaking test)
+    // Fix date formatting to avoid timezone issues
+    const formatDateLocal = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const scheduleData = {
-        mainTest: mainTestSchedule,
-        speakingTest: speakingSchedule,
-        userId: currentUser.id,
+        date: formatDateLocal(mainTestSchedule.date), // Format as YYYY-MM-DD without timezone issues
+        time: mainTestSchedule.time,
         center: 'Pretest Center',
         registeredAt: new Date().toISOString()
     };
-    
-    try {
-        // Save schedule via API
-        const response = await apiClient.saveTestSchedule(currentUser.id, scheduleData);
-        
-        if (response.success) {
-            // Update current user data
-            currentUser.testSchedule = scheduleData;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            // Store in legacy format for compatibility
-            localStorage.setItem('offlineSchedule', JSON.stringify(scheduleData));
-            
-            // Show success message
-            showToast('Test scheduled successfully!');
 
-            // Show admin contact alert after short delay
-            setTimeout(() => {
-                showAdminContactAlert();
-            }, 1500);
+    try {
+        // Get current user to get user data for backend
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        // Check if user exists (use firstName as indicator since id might not exist)
+        if (currentUser.firstName && currentUser.phone) {
+            try {
+                // Send registration data to backend
+                const response = await apiClient.post('/registrations/register', {
+                    user: {
+                        firstName: currentUser.firstName,
+                        lastName: currentUser.lastName,
+                        phone: currentUser.phone,
+                        email: currentUser.email || `${currentUser.phone.replace('+', '')}@temp.pretest.uz`
+                    },
+                    schedule: scheduleData
+                });
+
+                if (response.success) {
+                    console.log('Registration sent to backend successfully:', response);
+
+                    // Save schedule to localStorage (as fallback and for frontend)
+                    localStorage.setItem('testSchedule', JSON.stringify(scheduleData));
+
+                    // Show success message
+                    showToast('Test scheduled successfully!');
+
+                    // Show admin contact alert after short delay
+                    setTimeout(() => {
+                        showAdminContactAlert();
+                    }, 1500);
+
+                    return; // Exit early since backend save was successful
+                } else {
+                    console.warn('Backend registration failed:', response.message);
+                }
+            } catch (backendError) {
+                console.error('Failed to send registration to backend:', backendError);
+                // Fall through to localStorage approach if backend fails
+            }
         } else {
-            throw new Error(response.message || 'Failed to save schedule');
+            console.warn('No current user found or incomplete user data');
         }
+
+        // Fallback: Save schedule to localStorage only if backend failed or no user
+        localStorage.setItem('testSchedule', JSON.stringify(scheduleData));
+
+        // Show success message for localStorage fallback
+        showToast('Test scheduled locally. Please ensure internet connection for full registration.');
+
+        // Show admin contact alert after short delay
+        setTimeout(() => {
+            showAdminContactAlert();
+        }, 1500);
     } catch (error) {
         console.error('Error saving schedule:', error);
         alert('Failed to save your test schedule. Please try again.');
     }
 }
+
 
 // Toast notification function
 function showToast(message) {
@@ -467,26 +360,25 @@ function showToast(message) {
 
 // Check if user already has offline test scheduled
 function checkOfflineTestRestriction() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const offlineSchedule = JSON.parse(localStorage.getItem('offlineSchedule') || '{}');
-    
-    // Check if offline schedule exists AND belongs to current user
-    if (offlineSchedule.mainTest && offlineSchedule.speakingTest && 
-        offlineSchedule.userId && currentUser.id && 
-        offlineSchedule.userId === currentUser.id) {
-        
-        // Check if test dates have passed
-        const mainTestDate = new Date(offlineSchedule.mainTest.date);
-        const speakingTestDate = new Date(offlineSchedule.speakingTest.date);
+    const testSchedule = JSON.parse(localStorage.getItem('testSchedule') || '{}');
+
+    // Check if test schedule exists (simplified check - any existing schedule blocks new scheduling)
+    if (testSchedule.date && testSchedule.time) {
+        // Check if test date has passed
+        const testDate = new Date(testSchedule.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
-        // Get the later date between main and speaking test
-        const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-        
-        if (lastTestDate >= today) {
-            // Test dates haven't passed yet - show custom alert and redirect to profile
-            showCustomAlert('You already have a scheduled offline test. Please complete your scheduled test before enrolling in a new one.');
+
+        if (testDate >= today) {
+            // Test date hasn't passed yet - show custom alert and redirect to profile
+            const formattedDate = testDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            showCustomAlert(`You already have a scheduled test on ${formattedDate} at ${testSchedule.time}. Please complete your scheduled test before enrolling in a new one.`);
             setTimeout(() => {
                 window.location.href = 'profile.html';
             }, 2000);
@@ -506,27 +398,18 @@ document.addEventListener('DOMContentLoaded', function() {
         return; // Stop execution if user is restricted
     }
     // Generate time slots for main test
-    generateTimeSlotsForSection('main');
-    
+    generateTimeSlotsForSection();
+
     // Initialize main calendar
-    updateCalendarDisplay('main');
-    
+    updateCalendarDisplay();
+
     // Add navigation event listeners for main calendar
     document.getElementById('prev-month').addEventListener('click', () => {
-        navigateMonth(-1, 'main');
+        navigateMonth(-1);
     });
-    
+
     document.getElementById('next-month').addEventListener('click', () => {
-        navigateMonth(1, 'main');
-    });
-    
-    // Add navigation event listeners for speaking calendar
-    document.getElementById('speaking-prev-month').addEventListener('click', () => {
-        navigateMonth(-1, 'speaking');
-    });
-    
-    document.getElementById('speaking-next-month').addEventListener('click', () => {
-        navigateMonth(1, 'speaking');
+        navigateMonth(1);
     });
 });
 

@@ -8,14 +8,8 @@ const registrationSchema = new mongoose.Schema({
     email: { type: String, required: true }
   },
   schedule: {
-    mainTest: {
-      date: { type: String, required: false, default: null },
-      time: { type: String, required: false, default: null }
-    },
-    speakingTest: {
-      date: { type: String, required: false, default: null },
-      time: { type: String, required: false, default: null }
-    }
+    date: { type: String, required: false, default: null },
+    time: { type: String, required: false, default: null }
   },
   status: {
     type: String,

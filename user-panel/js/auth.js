@@ -376,11 +376,17 @@ async function handleSignup(e) {
         if (response.success) {
             // Store user data
             localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+
+            // Clear any existing test schedule data for new user
+            localStorage.removeItem('testSchedule');
+            localStorage.removeItem('offlineSchedule');
+            localStorage.removeItem('currentRegistration');
+
             showToast('Account created successfully!');
 
-            // Redirect to schedule page after toast
+            // Redirect to profile page instead of schedule page
             setTimeout(() => {
-                window.location.href = './ofline-schedule.html';
+                window.location.href = './profile.html';
             }, 1500);
         } else {
             showFormError(response.message || 'Registration failed');

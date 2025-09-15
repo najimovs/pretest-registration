@@ -14,15 +14,30 @@ class AdminDashboard {
     async loadRegistrations() {
         try {
             const response = await apiClient.getAllRegistrations();
-            // Filter to only show scheduled registrations and sort by creation date (oldest first, newest last)
+            console.log('All registrations from API:', response.data.registrations);
+
+            // Show all registrations that have a test scheduled
+            // Handle both old format (mainTest/speakingTest) and new format (date/time)
             this.registrations = response.data.registrations
-                .filter(r => r.status === 'scheduled')
+                .filter(r => {
+                    if (r.schedule) {
+                        // New format: check if date and time exist directly
+                        if (r.schedule.date && r.schedule.time) {
+                            return true;
+                        }
+                        // Old format: check if mainTest has date and time
+                        if (r.schedule.mainTest && r.schedule.mainTest.date && r.schedule.mainTest.time) {
+                            return true;
+                        }
+                    }
+                    return false;
+                })
                 .sort((a, b) => {
                     const dateA = new Date(a.createdAt);
                     const dateB = new Date(b.createdAt);
-                    return dateA.getTime() - dateB.getTime(); // Oldest first, newest last
+                    return dateB.getTime() - dateA.getTime(); // Newest first, oldest last
                 });
-            console.log('Loaded scheduled registrations successfully:', this.registrations.length);
+            console.log('Filtered registrations with scheduled tests:', this.registrations.length);
         } catch (error) {
             console.error('Failed to load registrations:', error);
             this.registrations = [];
@@ -31,7 +46,7 @@ class AdminDashboard {
     }
 
     updateStatistics() {
-        // Since we're only showing scheduled registrations, the count is just the length
+        // Count registrations with scheduled tests (have date and time)
         const scheduled = this.registrations.length;
         document.getElementById('scheduledTests').textContent = scheduled;
     }
@@ -78,12 +93,24 @@ class AdminDashboard {
             return `<span class="status-badge ${statusClasses[status] || 'status-scheduled'}">${status || 'scheduled'}</span>`;
         };
 
+        // Handle both old and new schedule formats
+        let testScheduleDisplay = 'Not scheduled';
+        if (schedule) {
+            // New format: direct date/time
+            if (schedule.date && schedule.time) {
+                testScheduleDisplay = formatDateTime(schedule.date, schedule.time);
+            }
+            // Old format: mainTest object
+            else if (schedule.mainTest && schedule.mainTest.date && schedule.mainTest.time) {
+                testScheduleDisplay = formatDateTime(schedule.mainTest.date, schedule.mainTest.time);
+            }
+        }
+
         row.innerHTML = `
             <td style="font-weight: bold; text-align: center;">${rowNumber}</td>
             <td>${user.firstName} ${user.lastName}</td>
             <td>${user.phone}</td>
-            <td>${schedule ? formatDateTime(schedule.mainTest?.date, schedule.mainTest?.time) : 'Not scheduled'}</td>
-            <td>${schedule ? formatDateTime(schedule.speakingTest?.date, schedule.speakingTest?.time) : 'Not scheduled'}</td>
+            <td>${testScheduleDisplay}</td>
             <td>${new Date(registration.createdAt).toLocaleDateString()}</td>
             <td>${getStatusBadge(registration.status)}</td>
         `;
@@ -97,18 +124,35 @@ class AdminDashboard {
             return;
         }
 
-        const data = this.registrations.map((reg, index) => ({
-            '#': index + 1,
-            'Student Name': `${reg.user.firstName} ${reg.user.lastName}`,
-            'Phone': reg.user.phone,
-            'Email': reg.user.email,
-            'Main Test Date': reg.schedule?.mainTest?.date || 'Not scheduled',
-            'Main Test Time': reg.schedule?.mainTest?.time || 'Not scheduled',
-            'Speaking Test Date': reg.schedule?.speakingTest?.date || 'Not scheduled',
-            'Speaking Test Time': reg.schedule?.speakingTest?.time || 'Not scheduled',
-            'Registration Date': new Date(reg.createdAt).toLocaleDateString(),
-            'Status': reg.status || 'scheduled'
-        }));
+        const data = this.registrations.map((reg, index) => {
+            // Handle both old and new schedule formats
+            let testDate = 'Not scheduled';
+            let testTime = 'Not scheduled';
+
+            if (reg.schedule) {
+                // New format: direct date/time
+                if (reg.schedule.date && reg.schedule.time) {
+                    testDate = reg.schedule.date;
+                    testTime = reg.schedule.time;
+                }
+                // Old format: mainTest object
+                else if (reg.schedule.mainTest && reg.schedule.mainTest.date && reg.schedule.mainTest.time) {
+                    testDate = reg.schedule.mainTest.date;
+                    testTime = reg.schedule.mainTest.time;
+                }
+            }
+
+            return {
+                '#': index + 1,
+                'Student Name': `${reg.user.firstName} ${reg.user.lastName}`,
+                'Phone': reg.user.phone,
+                'Email': reg.user.email,
+                'Test Date': testDate,
+                'Test Time': testTime,
+                'Registration Date': new Date(reg.createdAt).toLocaleDateString(),
+                'Status': reg.status || 'scheduled'
+            };
+        });
 
         const worksheet = XLSX.utils.json_to_sheet(data);
         const workbook = XLSX.utils.book_new();
@@ -147,8 +191,7 @@ class AdminDashboard {
                             <th>#</th>
                             <th>Student Name</th>
                             <th>Phone</th>
-                            <th>Main Test</th>
-                            <th>Speaking Test</th>
+                            <th>Test Schedule</th>
                             <th>Registration Date</th>
                             <th>Status</th>
                         </tr>
@@ -163,13 +206,25 @@ class AdminDashboard {
                 return `${date.toLocaleDateString()} at ${timeStr}`;
             };
 
+            // Handle both old and new schedule formats
+            let testScheduleDisplay = 'Not scheduled';
+            if (reg.schedule) {
+                // New format: direct date/time
+                if (reg.schedule.date && reg.schedule.time) {
+                    testScheduleDisplay = formatDateTime(reg.schedule.date, reg.schedule.time);
+                }
+                // Old format: mainTest object
+                else if (reg.schedule.mainTest && reg.schedule.mainTest.date && reg.schedule.mainTest.time) {
+                    testScheduleDisplay = formatDateTime(reg.schedule.mainTest.date, reg.schedule.mainTest.time);
+                }
+            }
+
             htmlContent += `
                 <tr>
                     <td>${index + 1}</td>
                     <td>${reg.user.firstName} ${reg.user.lastName}</td>
                     <td>${reg.user.phone}</td>
-                    <td>${reg.schedule ? formatDateTime(reg.schedule.mainTest?.date, reg.schedule.mainTest?.time) : 'Not scheduled'}</td>
-                    <td>${reg.schedule ? formatDateTime(reg.schedule.speakingTest?.date, reg.schedule.speakingTest?.time) : 'Not scheduled'}</td>
+                    <td>${testScheduleDisplay}</td>
                     <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
                     <td>${reg.status || 'scheduled'}</td>
                 </tr>
@@ -233,7 +288,7 @@ class AdminDashboard {
         if (tbody) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: #ef4444;">
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #ef4444;">
                         <div style="font-size: 18px; margin-bottom: 10px;">⚠️ Error Loading Data</div>
                         <div style="font-size: 14px;">${message}</div>
                         <button onclick="location.reload()" style="margin-top: 15px; padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">

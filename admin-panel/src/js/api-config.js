@@ -5,251 +5,76 @@ class APIClient {
         this.isOfflineMode = false; // Now using real backend
     }
 
-    // Mock data for development
-    getMockUsers() {
-        return JSON.parse(localStorage.getItem('mockUsers') || '[]');
-    }
+    async request(endpoint, options = {}) {
+        const url = `${this.baseURL}${endpoint}`;
+        const config = {
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers,
+            },
+            ...options,
+        };
 
-    saveMockUsers(users) {
-        localStorage.setItem('mockUsers', JSON.stringify(users));
-    }
-
-    getMockRegistrations() {
-        return JSON.parse(localStorage.getItem('mockRegistrations') || '[]');
-    }
-
-    saveMockRegistrations(registrations) {
-        localStorage.setItem('mockRegistrations', JSON.stringify(registrations));
-    }
-
-    // Auth methods
-    async register(userData) {
-        if (this.isOfflineMode) {
-            return this.mockRegister(userData);
-        }
-        
         try {
-            const response = await fetch(`${this.baseURL}/auth/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData)
-            });
-            
+            const response = await fetch(url, config);
             const data = await response.json();
-            
+
             if (!response.ok) {
-                throw new Error(data.message || 'Registration failed');
+                throw new Error(data.message || 'API request failed');
             }
-            
+
             return data;
         } catch (error) {
+            console.error('API request error:', error);
             throw error;
         }
     }
 
-    async login(credentials) {
-        if (this.isOfflineMode) {
-            return this.mockLogin(credentials);
-        }
-        
-        try {
-            const response = await fetch(`${this.baseURL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(credentials)
-            });
-            
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
-            }
-            
-            return data;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    // Mock implementations for development
-    mockRegister(userData) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                const users = this.getMockUsers();
-                
-                // Check if user already exists
-                const existingUser = users.find(user => user.phone === userData.phone);
-                if (existingUser) {
-                    reject(new Error('User with this phone number already exists'));
-                    return;
-                }
-                
-                // Create new user
-                const newUser = {
-                    id: Date.now(),
-                    firstName: userData.firstName,
-                    lastName: userData.lastName,
-                    phone: userData.phone,
-                    email: userData.email,
-                    password: userData.password, // In real app, this would be hashed
-                    createdAt: new Date().toISOString(),
-                    testSchedule: null
-                };
-                
-                users.push(newUser);
-                this.saveMockUsers(users);
-                
-                resolve({
-                    success: true,
-                    message: 'Registration successful',
-                    data: {
-                        user: {
-                            id: newUser.id,
-                            firstName: newUser.firstName,
-                            lastName: newUser.lastName,
-                            phone: newUser.phone,
-                            email: newUser.email
-                        }
-                    }
-                });
-            }, 1000); // Simulate network delay
+    // Create registration (combines user registration and test scheduling)
+    async createRegistration(registrationData) {
+        return this.request('/registrations/register', {
+            method: 'POST',
+            body: JSON.stringify(registrationData),
         });
     }
 
-    mockLogin(credentials) {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                const users = this.getMockUsers();
-                
-                // Find user by phone
-                const user = users.find(u => u.phone === credentials.phone && u.password === credentials.password);
-                
-                if (!user) {
-                    reject(new Error('Invalid phone number or password'));
-                    return;
-                }
-                
-                resolve({
-                    success: true,
-                    message: 'Login successful',
-                    data: {
-                        user: {
-                            id: user.id,
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            phone: user.phone,
-                            email: user.email,
-                            testSchedule: user.testSchedule
-                        }
-                    }
-                });
-            }, 1000); // Simulate network delay
-        });
-    }
-
-    // Schedule methods
-    async saveTestSchedule(userId, scheduleData) {
-        if (this.isOfflineMode) {
-            return this.mockSaveSchedule(userId, scheduleData);
-        }
-        
-        try {
-            const response = await fetch(`${this.baseURL}/schedule/save`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userId, ...scheduleData })
-            });
-            
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to save schedule');
-            }
-            
-            return data;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    mockSaveSchedule(userId, scheduleData) {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const users = this.getMockUsers();
-                const userIndex = users.findIndex(u => u.id === userId);
-                
-                if (userIndex !== -1) {
-                    users[userIndex].testSchedule = {
-                        ...scheduleData,
-                        registeredAt: new Date().toISOString()
-                    };
-                    this.saveMockUsers(users);
-                    
-                    // Also save to registrations for admin view
-                    const registrations = this.getMockRegistrations();
-                    registrations.push({
-                        id: Date.now(),
-                        user: users[userIndex],
-                        schedule: users[userIndex].testSchedule,
-                        status: 'scheduled',
-                        createdAt: new Date().toISOString()
-                    });
-                    this.saveMockRegistrations(registrations);
-                }
-                
-                resolve({
-                    success: true,
-                    message: 'Schedule saved successfully',
-                    data: { schedule: scheduleData }
-                });
-            }, 500);
-        });
-    }
-
-    // Get all registrations (for admin)
+    // Get all registrations (admin only)
     async getAllRegistrations() {
-        try {
-            const response = await fetch(`${this.baseURL}/registrations/all`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                timeout: 10000 // 10 second timeout
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Failed to fetch registrations');
-            }
-
-            console.log('Successfully fetched registrations:', data.data.registrations.length);
-            return data;
-        } catch (error) {
-            console.error('Failed to fetch registrations from backend:', error);
-
-            // Instead of falling back to empty mock data, throw the error
-            // so the admin dashboard can handle it properly
-            throw new Error(`Backend connection failed: ${error.message}`);
-        }
+        return this.request('/registrations/all');
     }
 
-    mockGetAllRegistrations() {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const registrations = this.getMockRegistrations();
-                resolve({
-                    success: true,
-                    data: { registrations }
-                });
-            }, 300);
+    // Update registration status (admin only)
+    async updateRegistrationStatus(registrationId, status) {
+        return this.request(`/registrations/${registrationId}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({ status }),
+        });
+    }
+
+    // Delete registration (admin only)
+    async deleteRegistration(registrationId) {
+        return this.request(`/registrations/${registrationId}`, {
+            method: 'DELETE',
+        });
+    }
+
+    // Health check
+    async healthCheck() {
+        return this.request('/health');
+    }
+
+    // Legacy methods for backward compatibility
+    async register(userData) {
+        return this.createRegistration({
+            user: userData,
+            schedule: null
+        });
+    }
+
+    async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data),
         });
     }
 

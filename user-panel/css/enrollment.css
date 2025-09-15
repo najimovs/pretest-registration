@@ -1463,6 +1463,47 @@ body {
     }
 }
 
+/* Speaking Info Alert Styles */
+.speaking-info-alert {
+    background: linear-gradient(135deg, #dbeafe 0%, rgba(59, 130, 246, 0.1) 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 4px solid #3B82F6;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    background: #3B82F6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-content strong {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.alert-content p {
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+}
+
 @media (max-width: 768px) {
     .container {
         padding: 15px;

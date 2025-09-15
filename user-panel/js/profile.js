@@ -72,46 +72,34 @@ function backToProfile() {
 }
 
 function startTest() {
-    // Check if user has offline test scheduled
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const offlineSchedule = JSON.parse(localStorage.getItem('offlineSchedule') || '{}');
-    
-    // Check if offline schedule exists AND belongs to current user
-    if (offlineSchedule.mainTest && offlineSchedule.speakingTest && 
-        offlineSchedule.userId && currentUser.id && 
-        offlineSchedule.userId === currentUser.id) {
-        // Check if test dates have passed
-        const mainTestDate = new Date(offlineSchedule.mainTest.date);
-        const speakingTestDate = new Date(offlineSchedule.speakingTest.date);
+    // Check if user has test scheduled (new simplified format)
+    const testSchedule = JSON.parse(localStorage.getItem('testSchedule') || '{}');
+
+    if (testSchedule.date && testSchedule.time) {
+        // Check if test date has passed
+        const testDate = new Date(testSchedule.date);
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time to compare only dates
-        
-        // Get the later date between main and speaking test
-        const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-        
-        if (lastTestDate >= today) {
-            // Test dates haven't passed yet - show test details with restriction message
-            showOfflineTestDetails(offlineSchedule, true);
+        today.setHours(0, 0, 0, 0);
+
+        if (testDate >= today) {
+            // Test date hasn't passed yet - show test details with restriction message
+            showTestDetails(testSchedule, true);
         } else {
-            // Test dates have passed - allow new test enrollment
-            // Clear old schedule and allow new enrollment
-            localStorage.removeItem('offlineSchedule');
+            // Test date has passed - clear old schedule and allow new enrollment
+            localStorage.removeItem('testSchedule');
             window.location.href = 'enrollment.html';
         }
     } else {
-        // No offline test scheduled, redirect to enrollment page
+        // No test scheduled, redirect to enrollment page
         window.location.href = 'enrollment.html';
     }
 }
 
-// Show offline test details modal
-function showOfflineTestDetails(scheduleData, isRestricted = false) {
-    const mainDate = new Date(scheduleData.mainTest.date);
-    const speakingDate = new Date(scheduleData.speakingTest.date);
-    
-    const mainDateStr = formatTestDate(mainDate);
-    const speakingDateStr = formatTestDate(speakingDate);
-    
+// Show test details modal (updated for simplified format)
+function showTestDetails(scheduleData, isRestricted = false) {
+    const testDate = new Date(scheduleData.date);
+    const testDateStr = formatTestDate(testDate);
+
     // Add restriction message if test is still scheduled
     const restrictionMessage = isRestricted ? `
         <div class="test-restriction">
@@ -123,11 +111,11 @@ function showOfflineTestDetails(scheduleData, isRestricted = false) {
             </div>
             <div class="restriction-content">
                 <h4 style="color: #F59E0B; margin: 0 0 5px 0;">Test Restriction</h4>
-                <p style="margin: 0; color: #64748B;">You cannot enroll in a new test until your scheduled test dates have passed.</p>
+                <p style="margin: 0; color: #64748B;">You cannot enroll in a new test until your scheduled test date has passed.</p>
             </div>
         </div>
     ` : '';
-    
+
     const testDetailsModal = `
         <div class="test-details-overlay" id="testDetailsOverlay">
             <div class="test-details-modal">
@@ -142,21 +130,30 @@ function showOfflineTestDetails(scheduleData, isRestricted = false) {
                 <div class="modal-content">
                     ${restrictionMessage}
                     <div class="test-session">
-                        <h4>Main Tests Session</h4>
+                        <h4>IELTS Test Session</h4>
                         <div class="test-info">
                             <p><strong>Tests:</strong> Writing, Reading & Listening</p>
-                            <p><strong>Date:</strong> ${mainDateStr}</p>
-                            <p><strong>Time:</strong> ${scheduleData.mainTest.time}</p>
+                            <p><strong>Date:</strong> ${testDateStr}</p>
+                            <p><strong>Time:</strong> ${scheduleData.time}</p>
                             <p><strong>Duration:</strong> 3 hours</p>
+                            <p><strong>Test Center:</strong> ${scheduleData.center || 'Pretest Center'}</p>
                         </div>
                     </div>
                     <div class="test-session">
-                        <h4>Speaking Test Session</h4>
-                        <div class="test-info">
-                            <p><strong>Test:</strong> Speaking (Offline)</p>
-                            <p><strong>Date:</strong> ${speakingDateStr}</p>
-                            <p><strong>Time:</strong> ${scheduleData.speakingTest.time}</p>
-                            <p><strong>Duration:</strong> 15-20 minutes</p>
+                        <h4>Speaking Test Information</h4>
+                        <div style="background: linear-gradient(135deg, #dbeafe 0%, rgba(59, 130, 246, 0.1) 100%); border-radius: 12px; padding: 20px; border-left: 4px solid #3B82F6;">
+                            <div style="display: flex; align-items: flex-start; gap: 15px;">
+                                <div style="width: 40px; height: 40px; background: #3B82F6; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                        <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <div style="flex: 1;">
+                                    <strong style="color: #2c3e50; font-size: 1rem; display: block; margin-bottom: 8px;">Speaking Test Schedule</strong>
+                                    <p style="color: #666; line-height: 1.5; margin: 0; font-size: 0.9rem;">Your speaking test schedule will be provided on your main exam day. Please arrive 30 minutes early to receive your speaking test time slot.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="test-status">
@@ -169,10 +166,10 @@ function showOfflineTestDetails(scheduleData, isRestricted = false) {
             </div>
         </div>
     `;
-    
+
     // Add modal to page
     document.body.insertAdjacentHTML('beforeend', testDetailsModal);
-    
+
     // Show modal
     document.getElementById('testDetailsOverlay').style.display = 'block';
 }
@@ -610,106 +607,44 @@ function showCustomAlert(message, type = 'error', title = null) {
 
 // Navigation functions
 function scheduleTest() {
-    const currentUser = apiClient.getCurrentUser();
+    // Check for existing test schedule (simplified format)
+    const testSchedule = JSON.parse(localStorage.getItem('testSchedule') || '{}');
 
-    if (!currentUser) {
-        window.location.href = './login.html';
-        return;
-    }
-
-    // Check registration data from localStorage
-    const currentRegistration = localStorage.getItem('currentRegistration');
-    if (currentRegistration) {
-        try {
-            const registration = JSON.parse(currentRegistration);
-            const schedule = registration.schedule;
-
-            // Check if user has an active test scheduled
-            if (schedule && schedule.mainTest && schedule.mainTest.date) {
-                const mainTestDate = new Date(schedule.mainTest.date);
-                const speakingTestDate = new Date(schedule.speakingTest?.date || schedule.mainTest.date);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                // Get the later date between main and speaking test
-                const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-
-                if (lastTestDate >= today) {
-                    // Test dates haven't passed yet - show restriction
-                    const mainDateStr = mainTestDate.toLocaleDateString('en-GB');
-                    const speakingDateStr = speakingTestDate.toLocaleDateString('en-GB');
-
-                    showCustomAlert(
-                        'Test Already Scheduled',
-                        `You already have a scheduled IELTS test:\n\n` +
-                        `📝 Main Test: ${mainDateStr} at ${schedule.mainTest.time}\n` +
-                        `🗣️ Speaking: ${speakingDateStr} at ${schedule.speakingTest?.time || schedule.mainTest.time}\n\n` +
-                        `Please complete your current test before scheduling a new one.`,
-                        'View Test Details',
-                        () => viewTestDetails()
-                    );
-                    return;
-                }
-            }
-        } catch (error) {
-            console.error('Error parsing registration data:', error);
-        }
-    }
-
-    // Also check legacy testSchedule format
-    if (currentUser.testSchedule) {
-        const mainTestDate = new Date(currentUser.testSchedule.mainTest?.date);
-        const speakingTestDate = new Date(currentUser.testSchedule.speakingTest?.date);
+    if (testSchedule.date && testSchedule.time) {
+        // Check if test date has passed
+        const testDate = new Date(testSchedule.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        // Get the later date between main and speaking test
-        const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
+        if (testDate >= today) {
+            // Test date hasn't passed yet - show restriction
+            const testDateStr = testDate.toLocaleDateString('en-GB');
 
-        if (lastTestDate >= today) {
-            // Test dates haven't passed yet - show alert
             showCustomAlert(
                 'Test Already Scheduled',
-                'You already have a scheduled IELTS test. Please complete your current test before scheduling a new one.',
+                `You already have a scheduled IELTS test on ${testDateStr} at ${testSchedule.time}. Please complete your current test before scheduling a new one.`,
                 'View Test Details',
                 () => viewTestDetails()
             );
             return;
+        } else {
+            // Test date has passed - clear old schedule
+            localStorage.removeItem('testSchedule');
         }
     }
 
-    // No active test or test dates have passed - allow scheduling
+    // No active test or test date has passed - allow scheduling
     window.location.href = './ofline-schedule.html';
 }
 
 function viewTestDetails() {
-    // Check if user has scheduled test data
-    const currentRegistration = localStorage.getItem('currentRegistration');
-    if (currentRegistration) {
-        try {
-            const registration = JSON.parse(currentRegistration);
-            const schedule = registration.schedule;
+    // Check for test schedule (simplified format)
+    const testSchedule = JSON.parse(localStorage.getItem('testSchedule') || '{}');
 
-            if (schedule && schedule.mainTest && schedule.mainTest.date) {
-                // User has scheduled test - show details modal
-                showOfflineTestDetails(schedule, false); // false = no restriction, just view
-                return;
-            }
-        } catch (error) {
-            console.error('Error parsing registration data:', error);
-        }
-    }
-
-    // Check legacy format
-    const offlineTestData = localStorage.getItem('offlineTestData');
-    if (offlineTestData) {
-        try {
-            const scheduleData = JSON.parse(offlineTestData);
-            showOfflineTestDetails(scheduleData, false);
-            return;
-        } catch (error) {
-            console.error('Error parsing offline test data:', error);
-        }
+    if (testSchedule.date && testSchedule.time) {
+        // User has scheduled test - show details modal
+        showTestDetails(testSchedule, false); // false = no restriction, just view
+        return;
     }
 
     // No test data found - redirect to test details page
@@ -777,60 +712,30 @@ function closeProfileAlert(hasCallback = false) {
 
 // Update schedule button based on user's test status
 function updateScheduleButton() {
-    const currentUser = apiClient.getCurrentUser();
     const scheduleCard = document.querySelector('.action-card[onclick="scheduleTest()"]');
 
-    if (!scheduleCard || !currentUser) return;
+    if (!scheduleCard) return;
 
     const cardTitle = scheduleCard.querySelector('.card-title');
     const cardDescription = scheduleCard.querySelector('.card-description');
     const cardButton = scheduleCard.querySelector('.card-button');
 
-    // Check registration data from localStorage first
-    const currentRegistration = localStorage.getItem('currentRegistration');
+    // Check test schedule (simplified format)
+    const testSchedule = JSON.parse(localStorage.getItem('testSchedule') || '{}');
     let hasActiveTest = false;
 
-    if (currentRegistration) {
-        try {
-            const registration = JSON.parse(currentRegistration);
-            const schedule = registration.schedule;
-
-            if (schedule && schedule.mainTest && schedule.mainTest.date) {
-                const mainTestDate = new Date(schedule.mainTest.date);
-                const speakingTestDate = new Date(schedule.speakingTest?.date || schedule.mainTest.date);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-
-                const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-
-                if (lastTestDate >= today) {
-                    hasActiveTest = true;
-                    // User has active test scheduled
-                    cardTitle.textContent = 'Test Scheduled';
-                    cardDescription.textContent = 'You have an active IELTS test scheduled';
-                    cardButton.textContent = 'View Details';
-                    cardButton.style.backgroundColor = '#F59E0B';
-                }
-            }
-        } catch (error) {
-            console.error('Error parsing registration data:', error);
-        }
-    }
-
-    // Also check legacy testSchedule format if no registration data
-    if (!hasActiveTest && currentUser.testSchedule) {
-        const mainTestDate = new Date(currentUser.testSchedule.mainTest?.date);
-        const speakingTestDate = new Date(currentUser.testSchedule.speakingTest?.date);
+    if (testSchedule.date && testSchedule.time) {
+        const testDate = new Date(testSchedule.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const lastTestDate = mainTestDate > speakingTestDate ? mainTestDate : speakingTestDate;
-
-        if (lastTestDate >= today) {
+        if (testDate >= today) {
             hasActiveTest = true;
+            // User has active test scheduled
             cardTitle.textContent = 'Test Scheduled';
             cardDescription.textContent = 'You have an active IELTS test scheduled';
             cardButton.textContent = 'View Details';
+            cardButton.style.backgroundColor = '#F59E0B';
         }
     }
 
