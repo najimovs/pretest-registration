@@ -470,13 +470,13 @@ function showAdminContactAlert() {
             margin-bottom: 15px;
             font-size: 1.5rem;
             font-weight: 600;
-        ">Successfully Registered!</h3>
+        ">Test Scheduled Successfully!</h3>
         <p style="
             color: #6b7280;
             margin-bottom: 25px;
             line-height: 1.6;
             font-size: 1rem;
-        ">Your test has been scheduled successfully. Our admins will contact you soon with additional details.</p>
+        ">Your IELTS test has been scheduled. Please proceed to payment to complete your registration.</p>
         <button onclick="closeAdminAlert()" style="
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
@@ -487,7 +487,7 @@ function showAdminContactAlert() {
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s ease;
-        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Continue</button>
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">Proceed to Payment</button>
     `;
 
     alertOverlay.appendChild(alertModal);
@@ -500,15 +500,15 @@ function showAdminContactAlert() {
     }, 100);
 }
 
-// Close admin alert and redirect
+// Close admin alert and redirect to payment
 function closeAdminAlert() {
     const alert = document.querySelector('.admin-contact-alert');
     if (alert) {
         alert.style.opacity = '0';
         setTimeout(() => {
             alert.remove();
-            // Use URL with hash to force scroll to top
-            window.location.href = './test-details.html#top';
+            // Redirect to payment page instead of test details
+            window.location.href = './payment.html';
         }, 300);
     }
 }

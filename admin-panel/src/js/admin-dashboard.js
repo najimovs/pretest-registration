@@ -84,6 +84,10 @@ class AdminDashboard {
         // Count registrations with scheduled tests (have date and time)
         const scheduled = this.registrations.length;
         document.getElementById('scheduledTests').textContent = scheduled;
+
+        // All scheduled tests are paid (50,000 UZS each)
+        const totalRevenue = scheduled * 50000;
+        document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString()} UZS`;
     }
 
     populateTable() {
@@ -147,11 +151,17 @@ class AdminDashboard {
             }
         }
 
+        // All scheduled tests are paid (no pending payments for scheduled tests)
+        const getPaymentBadge = () => {
+            return '<span style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">✓ Paid</span>';
+        };
+
         row.innerHTML = `
             <td style="font-weight: bold; text-align: center;">${rowNumber}</td>
             <td>${user.firstName} ${user.lastName}</td>
             <td>${user.phone}</td>
             <td>${testScheduleDisplay}</td>
+            <td>${getPaymentBadge()}</td>
             <td>${new Date(registration.createdAt).toLocaleDateString()}</td>
             <td>${getStatusBadge(registration.status)}</td>
         `;

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success - Pretest</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/enrollment.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: checkmarkAnimation 0.6s ease-in-out;
+        }
+
+        @keyframes checkmarkAnimation {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-icon svg {
+            color: white;
+            width: 40px;
+            height: 40px;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .success-message {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .payment-details {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .payment-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .payment-row:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .payment-label {
+            color: #6b7280;
+        }
+
+        .payment-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .redirect-info {
+            background: linear-gradient(135deg, #dbeafe 0%, rgba(59, 130, 246, 0.1) 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .redirect-info h4 {
+            color: #1f2937;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .redirect-info p {
+            color: #6b7280;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .countdown-timer {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="../assets/images/logolight.png" alt="Pretest Logo" class="logo">
+        </div>
+
+        <div class="success-container">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M20 6L9 17L4 12"/>
+                </svg>
+            </div>
+
+            <h1 class="success-title">Payment Successful!</h1>
+            <p class="success-message">
+                Your IELTS test has been successfully scheduled and payment has been processed.
+                You will receive a confirmation email shortly with all the details.
+            </p>
+
+            <div class="payment-details">
+                <div class="payment-row">
+                    <span class="payment-label">Test Date:</span>
+                    <span class="payment-value" id="test-date">Loading...</span>
+                </div>
+                <div class="payment-row">
+                    <span class="payment-label">Test Time:</span>
+                    <span class="payment-value" id="test-time">Loading...</span>
+                </div>
+                <div class="payment-row">
+                    <span class="payment-label">Payment Method:</span>
+                    <span class="payment-value" id="payment-method">Loading...</span>
+                </div>
+                <div class="payment-row">
+                    <span class="payment-label">Amount Paid:</span>
+                    <span class="payment-value">50,000 UZS</span>
+                </div>
+            </div>
+
+            <div class="redirect-info">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; margin-right: 8px;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M12 6v6l4 2"/>
+                    </svg>
+                    Auto-redirect in <span class="countdown-timer" id="countdown">5</span> seconds
+                </h4>
+                <p>You will be automatically redirected to your test details page where you can view all your test information.</p>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="goToTestDetails()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    View Test Details
+                </button>
+                <a href="profile.html" class="btn btn-secondary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Go to Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load and display test details
+        function loadTestDetails() {
+            const scheduleData = JSON.parse(localStorage.getItem('testSchedule') || '{}');
+
+            if (scheduleData.date && scheduleData.time) {
+                const testDate = new Date(scheduleData.date);
+                const options = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+
+                document.getElementById('test-date').textContent = testDate.toLocaleDateString('en-US', options);
+                document.getElementById('test-time').textContent = scheduleData.time;
+            }
+
+            if (scheduleData.paymentMethod) {
+                const methodName = scheduleData.paymentMethod === 'click' ? 'Click' : 'Payme';
+                document.getElementById('payment-method').textContent = methodName;
+            }
+        }
+
+        // Countdown and redirect
+        function startCountdown() {
+            let seconds = 5;
+            const countdownElement = document.getElementById('countdown');
+
+            const timer = setInterval(() => {
+                seconds--;
+                countdownElement.textContent = seconds;
+
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    goToTestDetails();
+                }
+            }, 1000);
+        }
+
+        // Redirect to test details
+        function goToTestDetails() {
+            window.location.href = 'test-details.html';
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTestDetails();
+            startCountdown();
+        });
+    </script>
+</body>
+</html>

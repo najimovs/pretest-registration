@@ -13,6 +13,7 @@
                 <img src="../../assets/images/logolight.png" alt="Pretest Logo" class="logo">
                 <div class="admin-info">
                     <span class="admin-badge">Admin Panel</span>
+                    <button onclick="window.location.href='payments.html'" class="btn btn-primary">Payment Analytics</button>
                     <button onclick="adminLogout()" class="btn btn-secondary">Logout</button>
                 </div>
             </div>
@@ -25,6 +26,10 @@
             <div class="stat-card">
                 <div class="stat-number" id="scheduledTests">0</div>
                 <div class="stat-label">Scheduled Tests</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                <div class="stat-number" id="totalRevenue">0 UZS</div>
+                <div class="stat-label">Total Revenue</div>
             </div>
         </div>
 
@@ -78,6 +83,7 @@
                             <th>Student Name</th>
                             <th>Phone</th>
                             <th>Test Schedule</th>
+                            <th>Payment</th>
                             <th>Registration Date</th>
                             <th>Status</th>
                         </tr>
