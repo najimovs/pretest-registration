@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/registrations', registrationRoutes);
+console.log('Payment routes imported:', typeof paymentRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Health check endpoint
