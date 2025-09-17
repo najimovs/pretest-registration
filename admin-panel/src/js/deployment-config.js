@@ -27,6 +27,7 @@ const config = isDevelopment ? DEPLOYMENT_CONFIG.development : DEPLOYMENT_CONFIG
 
 // Export configuration
 window.DEPLOYMENT_CONFIG = config;
+window.deploymentConfig = config; // For compatibility
 
 // Update API base URL dynamically
 if (typeof apiClient !== 'undefined') {

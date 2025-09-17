@@ -1,11 +1,17 @@
-// Offline Payment JavaScript
+// Click Payment Integration JavaScript
 
-let selectedPaymentMethod = '';
+let selectedPaymentMethod = 'click-button'; // Default to Click button
+let registrationId = null;
+
+// API configuration
+const API_BASE_URL = window.deploymentConfig?.BACKEND_URL ?
+    `${window.deploymentConfig.BACKEND_URL}/api` :
+    'http://localhost:8000/api';
 
 // Load schedule data and display
 function loadScheduleData() {
-    // Get schedule data from our new simplified format
-    const scheduleData = JSON.parse(localStorage.getItem('testSchedule') || '{}');
+    // Get schedule data from pending schedule (not final until paid)
+    const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
 
     if (scheduleData.date && scheduleData.time) {
         const testDate = new Date(scheduleData.date);
@@ -17,15 +23,27 @@ function loadScheduleData() {
     // Speaking test info (will be provided on exam day)
     document.getElementById('speaking-test-date').textContent = 'Will be provided on exam day';
     document.getElementById('speaking-test-time').textContent = 'TBD';
+
+    // Get registration ID if available
+    registrationId = scheduleData.registrationId || localStorage.getItem('registrationId');
+
+    // Validate registration ID exists
+    if (!registrationId) {
+        alert('Registration not found. Please complete your registration first.');
+        window.location.href = '../index.html';
+        return;
+    }
+
+    // Registration ID loaded
 }
 
 // Format date for display
 function formatDate(date) {
-    const options = { 
-        weekday: 'short', 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric' 
+    const options = {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
     };
     return date.toLocaleDateString('en-US', options);
 }
@@ -36,57 +54,254 @@ function selectPaymentMethod(method) {
     document.querySelectorAll('.payment-option-offline').forEach(option => {
         option.classList.remove('selected');
     });
-    
+
     // Remove checked state from all radios
     document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
         radio.checked = false;
     });
-    
+
     // Add selection to clicked option
-    const clickedOption = event.currentTarget;
+    const clickedOption = document.querySelector(`[data-payment="${method}"]`);
     clickedOption.classList.add('selected');
-    
+
     // Check the radio button
     const radio = clickedOption.querySelector('input[type="radio"]');
     radio.checked = true;
-    
+
     selectedPaymentMethod = method;
+    // Payment method selected
     checkFormComplete();
 }
 
 // Check if form is complete
 function checkFormComplete() {
     const nextBtn = document.getElementById('payment-next-btn');
-    nextBtn.disabled = !selectedPaymentMethod;
+    nextBtn.disabled = !selectedPaymentMethod || !registrationId;
 }
 
-// Proceed to payment success
-function proceedToConfirmation() {
-    // Show loading state
+// Create payment URL via backend API
+async function createPaymentURL() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/payments/click/create-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                registrationId: registrationId
+            })
+        });
+
+        const result = await response.json();
+        // Payment URL created
+
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to create payment URL');
+        }
+
+        return result; // Return the full result, not just result.data
+    } catch (error) {
+        console.error('Error creating payment URL:', error);
+        throw error;
+    }
+}
+
+// Proceed to Click payment
+async function proceedToConfirmation() {
     const nextBtn = document.getElementById('payment-next-btn');
-    nextBtn.textContent = 'Processing...';
-    nextBtn.disabled = true;
 
-    // Store payment method
-    const scheduleData = JSON.parse(localStorage.getItem('testSchedule') || '{}');
-    scheduleData.paymentMethod = selectedPaymentMethod;
-    scheduleData.paymentAmount = '50,000 UZS';
-    scheduleData.paymentStatus = 'completed';
-    scheduleData.paidAt = new Date().toISOString();
-    localStorage.setItem('testSchedule', JSON.stringify(scheduleData));
+    // Validate registration ID
+    if (!registrationId) {
+        alert('Registration not found. Please go back and complete registration first.');
+        return;
+    }
 
-    // Simulate payment processing
-    setTimeout(() => {
-        // Redirect to success page
-        window.location.href = 'payment-success.html';
-    }, 2000);
+    try {
+        // Show loading state
+        nextBtn.textContent = 'Creating Payment...';
+        nextBtn.disabled = true;
+
+        // Create payment URL
+        const paymentData = await createPaymentURL();
+
+        // Store payment info in pending schedule
+        const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+        scheduleData.paymentMethod = selectedPaymentMethod;
+        scheduleData.paymentAmount = '2,000 UZS';
+        scheduleData.paymentStatus = 'initiated';
+        scheduleData.registrationId = registrationId;
+        localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
+
+        // Handle different payment methods
+        if (selectedPaymentMethod === 'click-button') {
+            // Click Button - redirect to Click portal
+            const clickButtonUrl = paymentData.data.paymentData.clickButton.url;
+            // Redirecting to Click payment
+            window.location.href = clickButtonUrl;
+
+        } else if (selectedPaymentMethod === 'pay-by-card') {
+            // Pay by Card - use JavaScript SDK
+            const config = paymentData.data.paymentData.payByCard.config;
+            // Opening Click card payment
+
+            // Reset button text
+            nextBtn.textContent = 'Pay Now';
+            nextBtn.disabled = false;
+
+            // Use Click JavaScript SDK
+            if (typeof createPaymentRequest !== 'undefined') {
+                // Use correct parameter names as per Click docs
+                const clickConfig = {
+                    service_id: config.service_id,
+                    merchant_id: config.merchant_id,
+                    amount: config.amount,
+                    transaction_param: config.transaction_param,
+                    merchant_user_id: config.merchant_user_id
+                };
+
+                // Click payment configured
+
+                createPaymentRequest(clickConfig, function(result) {
+                    // Click payment completed
+
+                    if (result.status === 2) {
+                        // Payment successful - update backend and finalize schedule
+                        updatePaymentStatusInBackend('completed').then(() => {
+                            // Move from pending to final schedule
+                            const finalSchedule = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+                            finalSchedule.paymentStatus = 'completed';
+                            finalSchedule.paidAt = new Date().toISOString();
+
+                            // Save as final schedule and remove pending
+                            localStorage.setItem('testSchedule', JSON.stringify(finalSchedule));
+                            localStorage.removeItem('pendingSchedule');
+
+                            window.location.href = 'payment-success.html';
+                        }).catch((error) => {
+                            console.error('Failed to update payment status:', error);
+                            // Still redirect to success page since payment was successful
+                            window.location.href = 'payment-success.html';
+                        });
+                    } else if (result.status < 0) {
+                        // Payment error
+                        alert('Payment failed: ' + (result.error_note || 'Unknown error'));
+                    } else {
+                        // Payment processing or cancelled
+                        console.log('Payment status:', result.status);
+                    }
+                });
+            } else {
+                alert('Payment system not loaded. Please refresh the page and try again.');
+                console.error('createPaymentRequest function not available. SDK might not be loaded.');
+            }
+        }
+
+    } catch (error) {
+        console.error('Payment initiation error:', error);
+        alert('Failed to initiate payment: ' + error.message);
+
+        // Reset button
+        nextBtn.textContent = 'Pay Now';
+        nextBtn.disabled = false;
+    }
+}
+
+// Update payment status in backend
+async function updatePaymentStatusInBackend(status) {
+    if (!registrationId) {
+        throw new Error('No registration ID found');
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/payments/update-status`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                registrationId: registrationId,
+                paymentStatus: status,
+                paidAt: new Date().toISOString()
+            })
+        });
+
+        const result = await response.json();
+
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to update payment status');
+        }
+
+        console.log('Payment status updated successfully:', result);
+        return result;
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        throw error;
+    }
+}
+
+// Check payment status (for when user returns)
+async function checkPaymentStatus() {
+    if (!registrationId) {
+        return false;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/payments/status/${registrationId}`);
+        const result = await response.json();
+
+        if (result.success && result.data.paymentStatus === 'completed') {
+            // Payment completed, update backend and finalize schedule
+            updatePaymentStatusInBackend('completed').then(() => {
+                // Move from pending to final schedule
+                const finalSchedule = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+                finalSchedule.paymentStatus = 'completed';
+                finalSchedule.paidAt = new Date().toISOString();
+
+                // Save as final schedule and remove pending
+                localStorage.setItem('testSchedule', JSON.stringify(finalSchedule));
+                localStorage.removeItem('pendingSchedule');
+
+                window.location.href = 'payment-success.html';
+            }).catch((error) => {
+                console.error('Failed to update payment status:', error);
+                // Still redirect since payment was successful
+                window.location.href = 'payment-success.html';
+            });
+            return true;
+        }
+
+        return false;
+    } catch (error) {
+        console.error('Error checking payment status:', error);
+        return false;
+    }
+}
+
+// Handle payment return from Click
+function handlePaymentReturn() {
+    // Check URL parameters for payment result
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const transactionId = urlParams.get('transaction_id');
+
+    if (status || transactionId) {
+        console.log('Payment return detected:', { status, transactionId });
+        // Check payment status and redirect accordingly
+        setTimeout(checkPaymentStatus, 1000);
+    }
 }
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Load and display schedule data
     loadScheduleData();
-    
+
+    // Handle payment return from Click
+    handlePaymentReturn();
+
+    // Auto-enable payment button since Click is pre-selected
+    checkFormComplete();
+
     // Add click handlers to payment options
     document.querySelectorAll('.payment-option-offline').forEach(option => {
         option.addEventListener('click', function() {
@@ -94,7 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
             selectPaymentMethod(method);
         });
     });
-    
+
     // Also handle radio button clicks directly
     document.querySelectorAll('input[name="payment-method"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -103,14 +318,43 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
+
     // Handle label clicks
     document.querySelectorAll('.payment-radio label').forEach(label => {
-        label.addEventListener('click', function() {
+        label.addEventListener('click', function(e) {
+            e.preventDefault();
             const radio = document.getElementById(label.getAttribute('for'));
             const option = label.closest('.payment-option-offline');
             const method = option.dataset.payment;
             selectPaymentMethod(method);
         });
     });
+
+    // Periodically check payment status if payment was initiated
+    const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+    if (scheduleData.paymentStatus === 'initiated') {
+        const checkInterval = setInterval(async () => {
+            const completed = await checkPaymentStatus();
+            if (completed) {
+                clearInterval(checkInterval);
+            }
+        }, 5000); // Check every 5 seconds
+
+        // Clear interval after 10 minutes
+        setTimeout(() => clearInterval(checkInterval), 600000);
+    }
 });
+
+// Cancel payment and clear pending schedule
+function cancelPayment() {
+    // Clear pending schedule data since user cancelled
+    localStorage.removeItem('pendingSchedule');
+    localStorage.removeItem('registrationId');
+
+    // Redirect to profile page
+    window.location.href = 'profile.html';
+}
+
+// Global functions for button clicks
+window.proceedToConfirmation = proceedToConfirmation;
+window.cancelPayment = cancelPayment;

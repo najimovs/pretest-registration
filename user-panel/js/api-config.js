@@ -1,8 +1,13 @@
 // API Configuration and Client
 class APIClient {
     constructor() {
-        this.baseURL = 'https://pretest-registration.onrender.com/api';
+        // Use deployment config or default to localhost for development
+        const deploymentConfig = window.deploymentConfig || {};
+        this.baseURL = deploymentConfig.BACKEND_URL ?
+            `${deploymentConfig.BACKEND_URL}/api` :
+            'http://localhost:8000/api';
         this.isOfflineMode = false; // Now using real backend
+        console.log('API Client using baseURL:', this.baseURL);
     }
 
     async request(endpoint, options = {}) {
@@ -20,7 +25,25 @@ class APIClient {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'API request failed');
+                // For registration conflicts (409), return the error data instead of throwing
+                if (response.status === 409 && data.code === 'PHONE_EXISTS') {
+                    return data; // Return error response with user data
+                }
+
+                // For login errors with specific codes, return the error data
+                if ((response.status === 404 && data.code === 'USER_NOT_FOUND') ||
+                    (response.status === 401 && data.code === 'INVALID_PASSWORD') ||
+                    (response.status === 400 && data.code === 'NO_PASSWORD_SET')) {
+                    return data; // Return error response with specific code
+                }
+
+                console.error('API Error Details:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: data,
+                    url: url
+                });
+                throw new Error(data.message || `API request failed (${response.status})`);
             }
 
             return data;
@@ -65,34 +88,13 @@ class APIClient {
 
     // Authentication methods
     async login(credentials) {
-        // For the user panel, we'll check if user exists in registrations
-        // This is a simple implementation - in a real app, you'd have proper auth endpoints
-        try {
-            const response = await this.request('/registrations/all');
-            const registrations = response.data.registrations;
-
-            // Find user by phone
-            const userRegistration = registrations.find(reg =>
-                reg.user.phone === credentials.phone
-            );
-
-            if (!userRegistration) {
-                throw new Error('User not found. Please register first.');
-            }
-
-            // In a real app, you'd verify password with backend
-            // For now, we'll just return the user data
-            return {
-                success: true,
-                message: 'Login successful',
-                data: {
-                    user: userRegistration.user,
-                    registration: userRegistration
-                }
-            };
-        } catch (error) {
-            throw new Error(error.message || 'Login failed');
-        }
+        return this.request('/registrations/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                phone: credentials.phone,
+                password: credentials.password
+            })
+        });
     }
 
     // Legacy methods for backward compatibility

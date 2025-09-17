@@ -10,23 +10,113 @@ document.addEventListener('DOMContentLoaded', function() {
     setupCountryDropdowns();
 });
 
+// Phone already exists error modal
+function showPhoneExistsError(existingUser) {
+    const modalHTML = `
+        <div class="modal-overlay" id="phoneExistsModal" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; align-items: center;
+            justify-content: center; z-index: 10000; opacity: 0; transition: opacity 0.3s;
+        ">
+            <div class="modal-content" style="
+                background: white; border-radius: 12px; padding: 30px; max-width: 400px;
+                width: 90%; text-align: center; transform: translateY(-20px);
+                transition: transform 0.3s;
+            ">
+                <div style="color: #EF4444; margin-bottom: 20px;">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#EF4444" stroke-width="2" fill="#FEE2E2"/>
+                        <path d="M15 9l-6 6M9 9l6 6" stroke="#EF4444" stroke-width="2"/>
+                    </svg>
+                </div>
+                <h3 style="color: #1F2937; margin-bottom: 15px; font-size: 1.3rem;">Phone Already Registered</h3>
+                <p style="color: #6B7280; margin-bottom: 20px; line-height: 1.5;">
+                    This phone number is already registered by:<br>
+                    <strong style="color: #1F2937;">${existingUser.firstName} ${existingUser.lastName}</strong><br>
+                    <small>Registered: ${new Date(existingUser.registeredAt).toLocaleDateString()}</small>
+                </p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="redirectToLogin()" style="
+                        background: #3B82F6; color: white; border: none; padding: 10px 20px;
+                        border-radius: 6px; cursor: pointer; font-weight: 500;
+                    ">
+                        Login Instead
+                    </button>
+                    <button onclick="closePhoneExistsModal()" style="
+                        background: #6B7280; color: white; border: none; padding: 10px 20px;
+                        border-radius: 6px; cursor: pointer; font-weight: 500;
+                    ">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // Show modal with animation
+    setTimeout(() => {
+        const modal = document.getElementById('phoneExistsModal');
+        modal.style.opacity = '1';
+        modal.querySelector('.modal-content').style.transform = 'translateY(0)';
+    }, 10);
+}
+
+function redirectToLogin() {
+    closePhoneExistsModal();
+    // Switch to login tab if on same page, otherwise redirect
+    if (window.location.pathname.includes('login.html') || window.location.pathname.includes('signup.html')) {
+        // Try to switch tabs if available
+        const loginTab = document.querySelector('[data-tab="login"]');
+        if (loginTab) {
+            loginTab.click();
+        } else {
+            window.location.href = 'login.html';
+        }
+    } else {
+        window.location.href = 'login.html';
+    }
+}
+
+function closePhoneExistsModal() {
+    const modal = document.getElementById('phoneExistsModal');
+    if (modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => modal.remove(), 300);
+    }
+}
+
 // Toast notification function
-function showToast(message) {
+function showToast(message, type = 'success') {
     // Remove existing toast if any
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
         existingToast.remove();
     }
-    
+
     // Create toast element
     const toast = document.createElement('div');
-    toast.className = 'toast';
+    toast.className = `toast ${type}`;
+
+    // Different icons and colors for different types
+    const icons = {
+        success: `<path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>`,
+        error: `<path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"/>`
+    };
+
     toast.innerHTML = `
         <svg class="toast-icon" viewBox="0 0 20 20">
-            <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+            ${icons[type] || icons.success}
         </svg>
         <span class="toast-message">${message}</span>
     `;
+
+    // Add inline styles for error type
+    if (type === 'error') {
+        toast.style.background = '#EF4444';
+        toast.style.borderLeft = '4px solid #DC2626';
+    }
     
     // Add to body
     document.body.appendChild(toast);
@@ -274,7 +364,19 @@ async function handleLogin(e) {
                 }, 1500);
             }
         } else {
-            showFormError(response.message || 'Login failed');
+            // Show specific error messages based on error code
+            if (response.code === 'USER_NOT_FOUND') {
+                showFormError('Phone number not found. Please register first.');
+            } else if (response.code === 'INVALID_PASSWORD') {
+                showFormError('Invalid password. Please try again.');
+            } else if (response.code === 'NO_PASSWORD_SET') {
+                showFormError('This account was created before password support. Please register again.');
+                setTimeout(() => {
+                    window.location.href = 'signup.html';
+                }, 3000);
+            } else {
+                showFormError(response.message || 'Login failed');
+            }
         }
     } catch (error) {
         const errorMessage = apiClient.handleError(error);
@@ -389,11 +491,28 @@ async function handleSignup(e) {
                 window.location.href = './profile.html';
             }, 1500);
         } else {
-            showFormError(response.message || 'Registration failed');
+            // Check if it's a phone already exists error
+            if (response.code === 'PHONE_EXISTS') {
+                showToast('This phone number is already registered. Please login instead.', 'error');
+                // Optional: redirect to login after toast
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+            } else {
+                showFormError(response.message || 'Registration failed');
+            }
         }
     } catch (error) {
-        const errorMessage = apiClient.handleError(error);
-        showFormError(errorMessage);
+        // Check if error response contains phone exists info
+        if (error.message && error.message.includes('Phone number already registered')) {
+            showToast('This phone number is already registered. Please login instead.', 'error');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        } else {
+            const errorMessage = apiClient.handleError(error);
+            showFormError(errorMessage);
+        }
     } finally {
         setLoadingState(submitBtn, false);
     }

@@ -1,5 +1,52 @@
 // Two-Step Calendar and Time Selection JavaScript
 
+// Phone already exists alert function
+function showPhoneExistsAlert(existingUser) {
+    const alertHTML = `
+        <div class="custom-alert-overlay" id="phoneExistsAlert">
+            <div class="custom-alert-modal" style="max-width: 400px;">
+                <div class="alert-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="#EF4444" stroke-width="2" fill="#EF4444"/>
+                        <text x="12" y="17" text-anchor="middle" fill="white" font-size="14" font-weight="bold">!</text>
+                    </svg>
+                </div>
+                <h3 class="alert-title">Phone Number Already Registered</h3>
+                <p class="alert-message">
+                    This phone number is already registered by:<br>
+                    <strong>${existingUser.firstName} ${existingUser.lastName}</strong><br>
+                    Registered: ${new Date(existingUser.registeredAt).toLocaleDateString()}
+                </p>
+                <div style="margin-top: 20px;">
+                    <button onclick="redirectToLogin()" class="btn btn-primary" style="margin-right: 10px;">
+                        Login Instead
+                    </button>
+                    <button onclick="closePhoneExistsAlert()" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', alertHTML);
+
+    setTimeout(() => {
+        document.getElementById('phoneExistsAlert').classList.add('show');
+    }, 100);
+}
+
+function redirectToLogin() {
+    window.location.href = 'login.html';
+}
+
+function closePhoneExistsAlert() {
+    const alert = document.getElementById('phoneExistsAlert');
+    if (alert) {
+        alert.remove();
+    }
+}
+
 // Custom alert function
 function showCustomAlert(message) {
     // Remove existing alert if any
@@ -261,42 +308,97 @@ async function proceedToTestDetails() {
             console.log('DEBUG: User validation passed, sending to backend...');
 
             try {
-                // Send registration data to backend
-                const requestData = {
-                    user: {
-                        firstName: currentUser.firstName,
-                        lastName: currentUser.lastName,
+                // First, try to update existing registration for this phone number
+                console.log('DEBUG: Attempting to update existing registration...');
+
+                const updateResponse = await apiClient.request('/registrations/schedule/by-phone', {
+                    method: 'PUT',
+                    body: JSON.stringify({
                         phone: currentUser.phone,
-                        email: currentUser.email || `${currentUser.phone.replace('+', '')}@temp.pretest.uz`
-                    },
-                    schedule: scheduleData
-                };
-                console.log('DEBUG: Sending request data:', requestData);
+                        schedule: scheduleData
+                    })
+                });
 
-                const response = await apiClient.post('/registrations/register', requestData);
-                console.log('DEBUG: Backend response:', response);
+                console.log('DEBUG: Update response:', updateResponse);
 
-                if (response.success) {
-                    console.log('✅ Registration sent to backend successfully!');
+                if (updateResponse.success) {
+                    // Existing registration updated successfully
+                    scheduleData.registrationId = updateResponse.data.user.id;
+                    localStorage.setItem('registrationId', updateResponse.data.user.id);
+                    localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
 
-                    // Save schedule to localStorage (as fallback and for frontend)
-                    localStorage.setItem('testSchedule', JSON.stringify(scheduleData));
+                    showToast('Schedule updated successfully! Proceeding to payment...');
 
-                    // Show success message
-                    showToast('Test scheduled successfully!');
-
-                    // Show admin contact alert after short delay
                     setTimeout(() => {
-                        showAdminContactAlert();
+                        window.location.href = 'payment.html';
                     }, 1500);
 
-                    return; // Exit early since backend save was successful
-                } else {
-                    console.error('❌ Backend registration failed:', response.message);
+                    return;
                 }
-            } catch (backendError) {
-                console.error('❌ Exception during backend call:', backendError);
-                // Fall through to localStorage approach if backend fails
+
+            } catch (updateError) {
+                console.log('DEBUG: Update failed, trying to create new registration...', updateError.message);
+
+                // If update fails (user doesn't exist), try to create new registration
+                try {
+                    const requestData = {
+                        user: {
+                            firstName: currentUser.firstName,
+                            lastName: currentUser.lastName,
+                            phone: currentUser.phone,
+                            email: currentUser.email || `${currentUser.phone.replace('+', '')}@temp.pretest.uz`
+                        },
+                        schedule: scheduleData
+                    };
+                    console.log('DEBUG: Sending new registration request data:', requestData);
+
+                    const response = await apiClient.post('/registrations/register', requestData);
+                    console.log('DEBUG: New registration response:', response);
+
+                    if (response.success) {
+                        // Backend registration successful - save registration ID for payment
+                        scheduleData.registrationId = response.data.user.id;
+                        localStorage.setItem('registrationId', response.data.user.id);
+
+                        // Store schedule temporarily until payment (not as final schedule)
+                        localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
+
+                        // Show success message and redirect to payment
+                        showToast('Registration successful! Proceeding to payment...');
+
+                        // Redirect to payment page
+                        setTimeout(() => {
+                            window.location.href = 'payment.html';
+                        }, 1500);
+
+                        return;
+                    } else {
+                        // Handle specific error cases
+                        if (response.code === 'PHONE_EXISTS') {
+                            // Phone number already registered - check if we can get existing registration
+                            const existingUser = response.data?.existingUser;
+                            if (existingUser) {
+                                // Show phone exists modal with user info
+                                showPhoneExistsAlert(existingUser);
+                                return;
+                            } else {
+                                // Fallback: redirect to login
+                                showToast('This phone number is already registered. Please login instead.', 'error');
+                                setTimeout(() => {
+                                    window.location.href = 'login.html';
+                                }, 2000);
+                                return;
+                            }
+                        } else {
+                            console.error('❌ Backend registration failed:', response.message);
+                            showToast('Registration failed: ' + response.message);
+                            return;
+                        }
+                    }
+                } catch (backendError) {
+                    console.error('❌ Exception during new registration call:', backendError);
+                    // Fall through to localStorage approach if backend fails
+                }
             }
         } else {
             console.warn('❌ No current user found or incomplete user data:', {
@@ -306,16 +408,14 @@ async function proceedToTestDetails() {
             });
         }
 
-        // Fallback: Save schedule to localStorage only if backend failed or no user
-        localStorage.setItem('testSchedule', JSON.stringify(scheduleData));
+        // Fallback: Store schedule temporarily (backend failed or no user)
+        localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
 
-        // Show success message for localStorage fallback
-        showToast('Test scheduled locally. Please ensure internet connection for full registration.');
+        // Show error message for fallback
+        showToast('Registration requires internet connection. Please check connection and try again.');
 
-        // Show admin contact alert after short delay
-        setTimeout(() => {
-            showAdminContactAlert();
-        }, 1500);
+        // Don't proceed to payment without successful backend registration
+        return;
     } catch (error) {
         console.error('Error saving schedule:', error);
         alert('Failed to save your test schedule. Please try again.');
@@ -324,25 +424,37 @@ async function proceedToTestDetails() {
 
 
 // Toast notification function
-function showToast(message) {
+function showToast(message, type = 'success') {
     // Remove existing toast if any
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
         existingToast.remove();
     }
-    
+
     // Create toast element
     const toast = document.createElement('div');
     toast.className = 'toast';
+
+    // Different colors for different types
+    const styles = {
+        success: `
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        `,
+        error: `
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        `
+    };
+
     toast.style.cssText = `
         position: fixed;
         top: 20px;
         right: 20px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        ${styles[type] || styles.success}
         color: white;
         padding: 1rem 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         transform: translateX(100%);
         transition: transform 0.3s ease;
         z-index: 1000;
@@ -369,19 +481,19 @@ function showToast(message) {
     }, 5000);
 }
 
-// Check if user already has offline test scheduled
+// Check if user already has paid test scheduled
 function checkOfflineTestRestriction() {
     const testSchedule = JSON.parse(localStorage.getItem('testSchedule') || '{}');
 
-    // Check if test schedule exists (simplified check - any existing schedule blocks new scheduling)
-    if (testSchedule.date && testSchedule.time) {
+    // Only block if user has PAID test scheduled (not just pending payment)
+    if (testSchedule.date && testSchedule.time && testSchedule.paymentStatus === 'completed') {
         // Check if test date has passed
         const testDate = new Date(testSchedule.date);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         if (testDate >= today) {
-            // Test date hasn't passed yet - show custom alert and redirect to profile
+            // Paid test date hasn't passed yet - show custom alert and redirect to profile
             const formattedDate = testDate.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -396,6 +508,24 @@ function checkOfflineTestRestriction() {
             return true;
         }
     }
+
+    // Also check if user has pending payment - redirect to payment page
+    const pendingSchedule = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+    if (pendingSchedule.date && pendingSchedule.time && pendingSchedule.registrationId) {
+        const formattedDate = new Date(pendingSchedule.date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        showCustomAlert(`You have an unpaid scheduled test on ${formattedDate} at ${pendingSchedule.time}. Please complete payment or cancel to schedule a new test.`);
+        setTimeout(() => {
+            window.location.href = 'payment.html';
+        }, 2000);
+        return true;
+    }
+
     return false;
 }
 

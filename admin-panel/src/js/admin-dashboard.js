@@ -39,21 +39,11 @@ class AdminDashboard {
             // Store previous registrations to preserve row numbers
             const previousRegistrations = [...this.registrations];
 
-            // Show all registrations that have a test scheduled
-            // Handle both old format (mainTest/speakingTest) and new format (date/time)
+            // Show only registrations that have completed payment
             const newFilteredRegistrations = response.data.registrations
                 .filter(r => {
-                    if (r.schedule) {
-                        // New format: check if date and time exist directly
-                        if (r.schedule.date && r.schedule.time) {
-                            return true;
-                        }
-                        // Old format: check if mainTest has date and time
-                        if (r.schedule.mainTest && r.schedule.mainTest.date && r.schedule.mainTest.time) {
-                            return true;
-                        }
-                    }
-                    return false;
+                    // Only include registrations with completed payment
+                    return r.paymentStatus === 'completed';
                 })
                 .sort((a, b) => {
                     const dateA = new Date(a.createdAt);
@@ -382,8 +372,15 @@ function refreshDashboard() {
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Check admin authentication
-    const adminSession = localStorage.getItem('adminSession');
-    if (!adminSession) {
+    const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
+    if (!adminSession.token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Check if token is expired
+    if (adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
+        localStorage.removeItem('adminSession');
         window.location.href = 'login.html';
         return;
     }

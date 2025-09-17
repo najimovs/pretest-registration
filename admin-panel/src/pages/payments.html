@@ -34,9 +34,6 @@
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
 
-        .analytics-card.payme {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
 
         .analytics-card::before {
             content: '';
@@ -196,10 +193,6 @@
             color: #1e40af;
         }
 
-        .payment-method-badge.payme {
-            background: #d1fae5;
-            color: #065f46;
-        }
 
         .amount-cell {
             font-weight: 600;
@@ -298,13 +291,14 @@
                 </div>
             </div>
 
-            <div class="analytics-card payme">
+            <div class="analytics-card transactions">
                 <div class="analytics-content">
                     <svg class="analytics-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 6L9 17L4 12"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12,6 12,12 16,14"></polyline>
                     </svg>
-                    <div class="analytics-number" id="paymePayments">0</div>
-                    <div class="analytics-label">Payme Payments</div>
+                    <div class="analytics-number" id="totalTransactions">0</div>
+                    <div class="analytics-label">Total Transactions</div>
                 </div>
             </div>
         </div>

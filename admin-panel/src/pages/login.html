@@ -147,6 +147,7 @@
         </form>
     </div>
 
+    <script src="../js/deployment-config.js"></script>
     <script>
         // Clear form on page load
         window.addEventListener('load', function() {
@@ -154,26 +155,57 @@
             document.getElementById('password').value = '';
         });
 
-        document.getElementById('adminForm').addEventListener('submit', function(e) {
+        document.getElementById('adminForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('error');
-            
-            // Simple admin credentials (in real app, this would be properly secured)
-            if (username === 'admin' && password === 'pretest2025') {
-                // Store admin session
-                localStorage.setItem('adminSession', 'true');
-                window.location.href = 'index.html';
-            } else {
-                errorDiv.textContent = 'Invalid username or password';
+            const submitBtn = document.querySelector('button[type="submit"]');
+
+            // Show loading state
+            submitBtn.textContent = 'Signing in...';
+            submitBtn.disabled = true;
+            errorDiv.style.display = 'none';
+
+            try {
+                // Get API base URL from deployment config
+                const API_BASE_URL = window.DEPLOYMENT_CONFIG?.BACKEND_URL || 'http://localhost:8000';
+
+                const response = await fetch(`${API_BASE_URL}/api/registrations/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Store admin session with token
+                    localStorage.setItem('adminSession', JSON.stringify(result.data));
+                    window.location.href = 'index.html';
+                } else {
+                    errorDiv.textContent = result.message || 'Invalid credentials';
+                    errorDiv.style.display = 'block';
+
+                    // Clear error after 5 seconds
+                    setTimeout(() => {
+                        errorDiv.style.display = 'none';
+                    }, 5000);
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Connection error. Please check your network.';
                 errorDiv.style.display = 'block';
-                
-                // Clear error after 3 seconds
+
                 setTimeout(() => {
                     errorDiv.style.display = 'none';
-                }, 3000);
+                }, 5000);
+            } finally {
+                // Reset button
+                submitBtn.textContent = 'Sign In';
+                submitBtn.disabled = false;
             }
         });
     </script>

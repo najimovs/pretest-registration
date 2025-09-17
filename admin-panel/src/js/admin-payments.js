@@ -15,21 +15,25 @@ class AdminPaymentDashboard {
     async loadPaymentData() {
         try {
             const response = await apiClient.getAllRegistrations();
-            console.log('Loading payment data from registrations:', response);
+            // Loading payment data
 
-            // Extract payment data from registrations (all scheduled tests are paid)
+            // Extract payment data from registrations
             this.payments = response.data.registrations
                 .filter(registration => {
-                    // Only include registrations with scheduled tests
-                    return (registration.schedule &&
-                           ((registration.schedule.date && registration.schedule.time) ||
-                            (registration.schedule.mainTest && registration.schedule.mainTest.date)));
+                    // Only include registrations that have completed payment
+                    return registration.paymentStatus === 'completed';
                 })
                 .map(registration => {
                     // Transform registration data to payment format
                     const schedule = registration.schedule;
-                    const testDate = schedule.date ||
-                                   (schedule.mainTest ? schedule.mainTest.date : null);
+                    const testDate = schedule?.date ||
+                                   (schedule?.mainTest ? schedule.mainTest.date : null);
+
+                    // Get actual payment status from registration
+                    const paymentStatus = registration.paymentStatus || 'pending';
+                    const paymentDate = registration.paymentInfo?.completedAt ||
+                                      schedule?.paidAt ||
+                                      registration.createdAt;
 
                     return {
                         id: registration._id,
@@ -39,17 +43,17 @@ class AdminPaymentDashboard {
                             phone: registration.user.phone
                         },
                         testDate: testDate,
-                        amount: '50,000 UZS',
-                        paymentMethod: schedule.paymentMethod || 'click',
-                        paymentStatus: 'completed', // All scheduled tests are paid
-                        paymentDate: schedule.paidAt || registration.createdAt,
+                        amount: '2,000 UZS',
+                        paymentMethod: schedule?.paymentMethod || 'click',
+                        paymentStatus: paymentStatus,
+                        paymentDate: paymentDate,
                         createdAt: registration.createdAt
                     };
                 })
                 .sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
 
             this.filteredPayments = [...this.payments];
-            console.log('Processed payment data:', this.payments);
+            // Payment data processed
 
         } catch (error) {
             console.error('Failed to load payment data:', error);
@@ -60,16 +64,17 @@ class AdminPaymentDashboard {
     }
 
     updateAnalytics() {
-        // All scheduled tests are paid (50,000 UZS each)
-        const totalRevenue = this.payments.length * 50000;
+        // Calculate revenue only from completed payments
+        const completedPayments = this.payments.filter(p => p.paymentStatus === 'completed');
+        const totalRevenue = completedPayments.length * 2000;
         document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString()} UZS`;
 
-        // Payment method breakdown
-        const clickPayments = this.payments.filter(p => p.paymentMethod === 'click').length;
-        const paymePayments = this.payments.filter(p => p.paymentMethod === 'payme').length;
+        // Payment method breakdown (only Click now)
+        const clickPayments = completedPayments.length;
+        const totalTransactions = this.payments.length;
 
         document.getElementById('clickPayments').textContent = clickPayments;
-        document.getElementById('paymePayments').textContent = paymePayments;
+        document.getElementById('totalTransactions').textContent = totalTransactions;
     }
 
     populatePaymentTable() {
@@ -129,8 +134,8 @@ class AdminPaymentDashboard {
         };
 
         const getMethodBadge = (method) => {
-            const methodName = method === 'click' ? 'Click' : 'Payme';
-            return `<span class="payment-method-badge ${method}">${methodName}</span>`;
+            // Only support Click now
+            return `<span class="payment-method-badge click">Click</span>`;
         };
 
         row.innerHTML = `
@@ -162,7 +167,7 @@ class AdminPaymentDashboard {
                 'Phone': payment.student.phone,
                 'Test Date': payment.testDate ? new Date(payment.testDate).toLocaleDateString() : 'Not set',
                 'Amount': payment.amount,
-                'Payment Method': payment.paymentMethod === 'click' ? 'Click' : 'Payme',
+                'Payment Method': 'Click',
                 'Status': payment.paymentStatus,
                 'Payment Date': new Date(payment.paymentDate).toLocaleDateString(),
                 'Payment Time': new Date(payment.paymentDate).toLocaleTimeString()
@@ -255,8 +260,15 @@ function adminLogout() {
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
     // Check admin authentication
-    const adminSession = localStorage.getItem('adminSession');
-    if (!adminSession) {
+    const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
+    if (!adminSession.token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Check if token is expired
+    if (adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
+        localStorage.removeItem('adminSession');
         window.location.href = 'login.html';
         return;
     }

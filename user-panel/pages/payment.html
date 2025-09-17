@@ -64,7 +64,7 @@
                 <div class="amount-details">
                     <h2 class="total-label">Total Amount</h2>
                     <div class="total-price-with-icon">
-                        <div class="total-price">50,000 UZS</div>
+                        <div class="total-price">2,000 UZS</div>
                         <div class="amount-icon">
                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
@@ -79,33 +79,38 @@
 
             <!-- Payment Methods -->
             <div class="payment-methods-section">
-                <h3>Choose a payment method</h3>
+                <h3>Choose Payment Method</h3>
                 <div class="payment-options-offline">
-                    <div class="payment-option-offline" data-payment="click">
+                    <div class="payment-option-offline selected" data-payment="click-button">
                         <div class="payment-option-content">
                             <img src="../../assets/images/click-logo-horizantal.png" alt="Click" class="payment-logo">
                             <div class="payment-option-text">
-                                <h4>Click</h4>
-                                <p>Pay with Click</p>
+                                <h4>Click Wallet</h4>
+                                <p>Pay with your Click account</p>
                             </div>
                         </div>
                         <div class="payment-radio">
-                            <input type="radio" name="payment-method" id="click-radio" value="click">
-                            <label for="click-radio"></label>
+                            <input type="radio" name="payment-method" id="click-button-radio" value="click-button" checked>
+                            <label for="click-button-radio"></label>
                         </div>
                     </div>
-                    
-                    <div class="payment-option-offline" data-payment="payme">
+
+                    <div class="payment-option-offline" data-payment="pay-by-card">
                         <div class="payment-option-content">
-                            <img src="../../assets/images/payme.png" alt="Payme" class="payment-logo">
+                            <div class="payment-logo" style="display: flex; align-items: center; justify-content: center; width: 60px; height: 30px; background: #f8f9fa; border-radius: 4px;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                    <line x1="1" y1="10" x2="23" y2="10"/>
+                                </svg>
+                            </div>
                             <div class="payment-option-text">
-                                <h4>Payme</h4>
-                                <p>Pay with Payme</p>
+                                <h4>Any Bank Card</h4>
+                                <p>Visa, MasterCard, UzCard, Humo</p>
                             </div>
                         </div>
                         <div class="payment-radio">
-                            <input type="radio" name="payment-method" id="payme-radio" value="payme">
-                            <label for="payme-radio"></label>
+                            <input type="radio" name="payment-method" id="pay-by-card-radio" value="pay-by-card">
+                            <label for="pay-by-card-radio"></label>
                         </div>
                     </div>
                 </div>
@@ -176,18 +181,21 @@
                     </div>
                     <div class="summary-row total-row">
                         <span class="summary-label">Total:</span>
-                        <span class="summary-value total">50,000 UZS</span>
+                        <span class="summary-value total">2,000 UZS</span>
                     </div>
                 </div>
             </div>
 
             <div class="navigation">
-                <button class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
-                <button class="btn btn-primary" onclick="proceedToConfirmation()" id="payment-next-btn" disabled>Next</button>
+                <button class="btn btn-secondary" onclick="cancelPayment()">Cancel</button>
+                <button class="btn btn-primary" onclick="proceedToConfirmation()" id="payment-next-btn">Pay Now</button>
             </div>
         </div>
     </div>
 
+    <!-- Click Pay by Card SDK -->
+    <script src="https://my.click.uz/pay/checkout.js"></script>
+    <script src="../../js/deployment-config.js"></script>
     <script src="../../js/offline-payment.js"></script>
 </body>
 </html>
