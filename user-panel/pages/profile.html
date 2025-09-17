@@ -36,41 +36,21 @@
                 </button>
             </div>
             <div class="modal-content">
-                <div class="form-group">
+                <div class="user-detail-item">
                     <label>First Name</label>
-                    <input type="text" id="modalFirstName" readonly>
+                    <div class="detail-value" id="modalFirstName">Loading...</div>
                 </div>
-                <div class="form-group">
+                <div class="user-detail-item">
                     <label>Last Name</label>
-                    <input type="text" id="modalLastName" readonly>
+                    <div class="detail-value" id="modalLastName">Loading...</div>
                 </div>
-                <div class="form-group">
+                <div class="user-detail-item">
                     <label>Phone Number</label>
-                    <input type="text" id="modalPhone" readonly>
-                </div>
-                <div class="form-group" id="currentPasswordGroup" style="display: none;">
-                    <label>Current Password</label>
-                    <input type="password" id="modalCurrentPassword" placeholder="Enter current password">
-                </div>
-                <div class="form-group" id="newPasswordGroup" style="display: none;">
-                    <label>New Password</label>
-                    <input type="password" id="modalNewPassword" placeholder="Enter new password">
-                </div>
-                <div class="form-group" id="confirmPasswordGroup" style="display: none;">
-                    <label>Confirm New Password</label>
-                    <input type="password" id="modalConfirmPassword" placeholder="Confirm new password">
-                </div>
-                <div class="form-group" id="forgotPasswordGroup" style="display: none;">
-                    <button type="button" class="forgot-password-btn" onclick="sendForgotPasswordSMS()">
-                        Forgot password? Send SMS verification
-                    </button>
+                    <div class="detail-value" id="modalPhone">Loading...</div>
                 </div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn modal-btn-edit" id="editBtn" onclick="enableEdit()">Edit</button>
                 <button class="modal-btn modal-btn-close" onclick="closeUserDetails()">Close</button>
-                <button class="modal-btn modal-btn-save" id="saveBtn" onclick="saveDetails()" style="display: none;">Done</button>
-                <button class="modal-btn modal-btn-cancel" id="cancelBtn" onclick="cancelEdit()" style="display: none;">Cancel</button>
             </div>
         </div>
     </div>

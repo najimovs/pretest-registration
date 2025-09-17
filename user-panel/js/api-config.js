@@ -12,9 +12,14 @@ class APIClient {
 
     async request(endpoint, options = {}) {
         const url = `${this.baseURL}${endpoint}`;
+
+        // Get JWT token from localStorage
+        const token = this.getToken();
+
         const config = {
             headers: {
                 'Content-Type': 'application/json',
+                ...(token && { 'Authorization': `Bearer ${token}` }),
                 ...options.headers,
             },
             ...options,
@@ -105,10 +110,29 @@ class APIClient {
         });
     }
 
+    async get(endpoint) {
+        return this.request(endpoint, {
+            method: 'GET'
+        });
+    }
+
     async post(endpoint, data) {
         return this.request(endpoint, {
             method: 'POST',
             body: JSON.stringify(data),
+        });
+    }
+
+    async put(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async delete(endpoint) {
+        return this.request(endpoint, {
+            method: 'DELETE'
         });
     }
 
@@ -147,10 +171,28 @@ class APIClient {
 
     logout() {
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
     }
 
     isAuthenticated() {
-        return !!this.getCurrentUser();
+        return !!this.getCurrentUser() && !!this.getToken();
+    }
+
+    // Token management methods
+    getToken() {
+        try {
+            return localStorage.getItem('authToken');
+        } catch {
+            return null;
+        }
+    }
+
+    setToken(token) {
+        localStorage.setItem('authToken', token);
+    }
+
+    clearToken() {
+        localStorage.removeItem('authToken');
     }
 }
 

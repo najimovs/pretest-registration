@@ -333,9 +333,14 @@ async function handleLogin(e) {
         });
         
         if (response.success) {
-            // Store user data and registration info
+            // Store user data, registration info, and JWT token
             localStorage.setItem('currentUser', JSON.stringify(response.data.user));
             localStorage.setItem('currentRegistration', JSON.stringify(response.data.registration));
+
+            // Store JWT token for authenticated requests
+            if (response.data.token) {
+                apiClient.setToken(response.data.token);
+            }
 
             // Check if user has scheduled test
             const hasScheduledTest = response.data.registration.schedule &&

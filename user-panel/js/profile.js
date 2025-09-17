@@ -232,45 +232,24 @@ function initializePage() {
 // User Details Modal Functions - ONLY triggered by clicking avatar
 async function showUserDetails() {
     console.log('showUserDetails called by avatar click');
-    
+
     try {
-        // Get current user profile from API
-        const response = await apiClient.get('/user/profile');
-        
-        if (response.success) {
-            const currentUser = response.data.user;
-            
-            // Populate modal fields
-            document.getElementById('modalFirstName').value = currentUser.firstName || '';
-            document.getElementById('modalLastName').value = currentUser.lastName || '';
-            document.getElementById('modalPhone').value = currentUser.phone || '';
-            
-            // Store original data for cancel functionality
-            originalUserData = { ...currentUser };
-            
-        } else {
-            // Fallback to localStorage if API fails
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-            
-            document.getElementById('modalFirstName').value = currentUser.firstName || '';
-            document.getElementById('modalLastName').value = currentUser.lastName || '';
-            document.getElementById('modalPhone').value = currentUser.phone || '';
-            
-            originalUserData = { ...currentUser };
-        }
-        
+        // Get current user from localStorage (simple and fast)
+        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+
+        // Display user details in modal (read-only)
+        document.getElementById('modalFirstName').textContent = currentUser.firstName || 'N/A';
+        document.getElementById('modalLastName').textContent = currentUser.lastName || 'N/A';
+        document.getElementById('modalPhone').textContent = currentUser.phone || 'N/A';
+
     } catch (error) {
         console.error('Failed to load user profile:', error);
-        // Fallback to localStorage
-        const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        
-        document.getElementById('modalFirstName').value = currentUser.firstName || '';
-        document.getElementById('modalLastName').value = currentUser.lastName || '';
-        document.getElementById('modalPhone').value = currentUser.phone || '';
-        
-        originalUserData = { ...currentUser };
+        // Show error state
+        document.getElementById('modalFirstName').textContent = 'Error loading data';
+        document.getElementById('modalLastName').textContent = 'Error loading data';
+        document.getElementById('modalPhone').textContent = 'Error loading data';
     }
-    
+
     // Show modal
     const overlay = document.getElementById('userDetailsOverlay');
     if (overlay) {
@@ -280,7 +259,6 @@ async function showUserDetails() {
 }
 
 function closeUserDetails() {
-    resetToViewMode();
     const overlay = document.getElementById('userDetailsOverlay');
     if (overlay) {
         overlay.classList.remove('show');
@@ -288,50 +266,26 @@ function closeUserDetails() {
     }
 }
 
+// Removed edit functionality - keeping function stubs for compatibility
 function enableEdit() {
-    // Enable input fields
-    document.getElementById('modalFirstName').readOnly = false;
-    document.getElementById('modalLastName').readOnly = false;
-    document.getElementById('modalPhone').readOnly = false;
-    
-    // Show password change fields
-    document.getElementById('currentPasswordGroup').style.display = 'block';
-    document.getElementById('newPasswordGroup').style.display = 'block';
-    document.getElementById('confirmPasswordGroup').style.display = 'block';
-    document.getElementById('forgotPasswordGroup').style.display = 'block';
-    
-    // Change button visibility
-    document.getElementById('editBtn').style.display = 'none';
-    document.getElementById('saveBtn').style.display = 'inline-block';
-    document.getElementById('cancelBtn').style.display = 'inline-block';
-    
-    // Focus on first input
-    document.getElementById('modalFirstName').focus();
+    console.log('Edit functionality removed');
 }
 
 function cancelEdit() {
-    // Restore original data
-    document.getElementById('modalFirstName').value = originalUserData.firstName;
-    document.getElementById('modalLastName').value = originalUserData.lastName;
-    document.getElementById('modalPhone').value = originalUserData.phone;
-    
-    // Clear password change fields
-    document.getElementById('modalCurrentPassword').value = '';
-    document.getElementById('modalNewPassword').value = '';
-    document.getElementById('modalConfirmPassword').value = '';
-    
-    // Hide password change fields
-    document.getElementById('currentPasswordGroup').style.display = 'none';
-    document.getElementById('newPasswordGroup').style.display = 'none';
-    document.getElementById('confirmPasswordGroup').style.display = 'none';
-    document.getElementById('forgotPasswordGroup').style.display = 'none';
-    
-    // Reset to view mode
-    resetToViewMode();
+    console.log('Edit functionality removed');
+}
+
+function resetToViewMode() {
+    console.log('Edit functionality removed');
+}
+
+function sendForgotPasswordSMS() {
+    console.log('Edit functionality removed');
 }
 
 async function saveDetails() {
-    // Get updated values
+    console.log('Edit functionality removed - save function disabled');
+    return;
     const currentPassword = document.getElementById('modalCurrentPassword').value.trim();
     const newPassword = document.getElementById('modalNewPassword').value.trim();
     const confirmPassword = document.getElementById('modalConfirmPassword').value.trim();

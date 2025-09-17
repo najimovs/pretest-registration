@@ -1,6 +1,8 @@
 import express from 'express';
 import crypto from 'crypto';
 import Registration from '../models/Registration.js';
+import logger from '../utils/logger.js';
+import { validatePayment } from '../middleware/validation.js';
 
 const router = express.Router();
 
@@ -46,16 +48,28 @@ function validateClickSignature(params, receivedSignature, isPrepare = true) {
 // Validate request origin (Click IP addresses)
 function validateClickOrigin(req) {
   const clientIP = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
-  // Click's IP ranges - update these based on Click's documentation
-  const clickIPs = [
-    '185.8.212.184',
-    '185.8.212.185',
-    '185.8.212.186',
-    '127.0.0.1', // Allow localhost for development
-    '::1' // Allow localhost IPv6 for development
-  ];
 
-  return clickIPs.some(ip => clientIP.includes(ip));
+  // Get allowed IPs from environment
+  const allowedIPs = process.env.CLICK_ALLOWED_IPS
+    ? process.env.CLICK_ALLOWED_IPS.split(',').map(ip => ip.trim())
+    : ['185.8.212.184', '185.8.212.185', '185.8.212.186'];
+
+  // In development, allow localhost
+  if (process.env.NODE_ENV === 'development') {
+    allowedIPs.push('127.0.0.1', '::1', '::ffff:127.0.0.1');
+  }
+
+  const isAllowed = allowedIPs.some(ip => clientIP.includes(ip));
+
+  if (!isAllowed) {
+    logger.warn('Click request from unauthorized IP', {
+      clientIP,
+      allowedIPs,
+      userAgent: req.headers['user-agent']
+    });
+  }
+
+  return isAllowed;
 }
 
 // Clean up expired payments
@@ -92,14 +106,21 @@ setInterval(cleanupExpiredPayments, 5 * 60 * 1000);
 
 // Transaction logging function
 function logTransaction(type, data, status = 'info') {
-  const timestamp = new Date().toISOString();
-  const logEntry = {
-    timestamp,
+  const logData = {
     type,
     status,
-    data: JSON.stringify(data)
+    ...data,
+    timestamp: new Date().toISOString()
   };
-  console.log(`[${timestamp}] [${status.toUpperCase()}] [${type}]`, data);
+
+  // Use Winston logger with payments.log
+  if (status === 'error') {
+    logger.error(`Payment: ${type}`, logData);
+  } else if (status === 'warning') {
+    logger.warn(`Payment: ${type}`, logData);
+  } else {
+    logger.info(`Payment: ${type}`, logData);
+  }
 }
 
 // Click Prepare endpoint - validates payment request
@@ -121,21 +142,28 @@ router.post('/click/prepare', async (req, res) => {
       click_trans_id,
       merchant_trans_id,
       amount,
-      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent']
     });
 
     // Click Prepare Request received
 
-    // Validate request origin (uncomment for production)
-    // if (!validateClickOrigin(req)) {
-    //   return res.json({
-    //     click_trans_id: click_trans_id,
-    //     merchant_trans_id: merchant_trans_id,
-    //     merchant_prepare_id: null,
-    //     error: -9,
-    //     error_note: "Invalid request origin"
-    //   });
-    // }
+    // Validate request origin - enabled in production
+    if (process.env.NODE_ENV === 'production' && !validateClickOrigin(req)) {
+      logTransaction('CLICK_PREPARE_ERROR', {
+        click_trans_id,
+        merchant_trans_id,
+        error: 'Invalid request origin',
+        ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      }, 'error');
+      return res.json({
+        click_trans_id: click_trans_id,
+        merchant_trans_id: merchant_trans_id,
+        merchant_prepare_id: null,
+        error: -9,
+        error_note: "Invalid request origin"
+      });
+    }
 
     // Validate required fields
     if (!click_trans_id || !service_id || !click_paydoc_id || !merchant_trans_id || !amount || action === undefined || !sign_time || !sign_string) {
@@ -255,7 +283,19 @@ router.post('/click/prepare', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Click Prepare Error:', error);
+    logger.error('Click Prepare Error:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+      ip: req.ip
+    });
+
+    logTransaction('CLICK_PREPARE_ERROR', {
+      click_trans_id: req.body.click_trans_id,
+      merchant_trans_id: req.body.merchant_trans_id,
+      error: 'System error'
+    }, 'error');
+
     res.json({
       click_trans_id: req.body.click_trans_id || null,
       merchant_trans_id: req.body.merchant_trans_id || null,
@@ -292,16 +332,22 @@ router.post('/click/complete', async (req, res) => {
 
     // Click Complete Request received
 
-    // Validate request origin (uncomment for production)
-    // if (!validateClickOrigin(req)) {
-    //   return res.json({
-    //     click_trans_id: click_trans_id,
-    //     merchant_trans_id: merchant_trans_id,
-    //     merchant_confirm_id: null,
-    //     error: -9,
-    //     error_note: "Invalid request origin"
-    //   });
-    // }
+    // Validate request origin - enabled in production
+    if (process.env.NODE_ENV === 'production' && !validateClickOrigin(req)) {
+      logTransaction('CLICK_COMPLETE_ERROR', {
+        click_trans_id,
+        merchant_trans_id,
+        error: 'Invalid request origin',
+        ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      }, 'error');
+      return res.json({
+        click_trans_id: click_trans_id,
+        merchant_trans_id: merchant_trans_id,
+        merchant_confirm_id: null,
+        error: -9,
+        error_note: "Invalid request origin"
+      });
+    }
 
     // Validate required fields
     if (!click_trans_id || !service_id || !click_paydoc_id || !merchant_trans_id || !merchant_prepare_id || !amount || action === undefined || !sign_time || !sign_string) {
@@ -420,7 +466,19 @@ router.post('/click/complete', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Click Complete Error:', error);
+    logger.error('Click Complete Error:', {
+      error: error.message,
+      stack: error.stack,
+      body: req.body,
+      ip: req.ip
+    });
+
+    logTransaction('CLICK_COMPLETE_ERROR', {
+      click_trans_id: req.body.click_trans_id,
+      merchant_trans_id: req.body.merchant_trans_id,
+      error: 'System error'
+    }, 'error');
+
     res.json({
       click_trans_id: req.body.click_trans_id || null,
       merchant_trans_id: req.body.merchant_trans_id || null,
@@ -432,7 +490,7 @@ router.post('/click/complete', async (req, res) => {
 });
 
 // Create payment URL endpoint for frontend
-router.post('/click/create-payment', async (req, res) => {
+router.post('/click/create-payment', validatePayment, async (req, res) => {
   try {
     const { registrationId } = req.body;
 
