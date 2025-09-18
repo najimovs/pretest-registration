@@ -380,10 +380,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Check if token is expired
-    if (adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
-        localStorage.removeItem('adminSession');
-        window.location.href = 'login.html';
-        return;
+    if (adminSession.expiresAt) {
+        const now = new Date();
+        const expiry = new Date(adminSession.expiresAt);
+        console.log('Token expiry check:', {
+            now: now.toISOString(),
+            expiry: expiry.toISOString(),
+            isExpired: now > expiry
+        });
+
+        if (now > expiry) {
+            console.log('Token expired, redirecting to login');
+            localStorage.removeItem('adminSession');
+            window.location.href = 'login.html';
+            return;
+        }
     }
 
     dashboard = new AdminDashboard();
