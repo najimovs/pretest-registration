@@ -25,8 +25,11 @@ const allowedOrigins = [
   process.env.ADMIN_PANEL_URL,
   'https://whimsical-sprite-8f17d6.netlify.app',
   'https://admin.pretest-uzbekistan.uz',
+  // Add any subdomains you're using
+  'https://your-admin-subdomain.netlify.app', // Replace with your actual subdomain
   'http://localhost:3000',
   'http://localhost:3001',
+  'http://localhost:3002',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://127.0.0.1:3000',

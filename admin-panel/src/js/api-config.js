@@ -153,11 +153,25 @@ class APIClient {
 // Create global instance
 const apiClient = new APIClient();
 
-// Update API base URL when deployment config is loaded
+// Update API base URL immediately if deployment config exists
+if (window.DEPLOYMENT_CONFIG) {
+    apiClient.baseURL = window.DEPLOYMENT_CONFIG.BACKEND_URL + '/api';
+    console.log('API Client URL updated from deployment config (immediate):', apiClient.baseURL);
+}
+
+// Also update on load event as backup
 window.addEventListener('load', () => {
-    if (window.DEPLOYMENT_CONFIG) {
+    if (window.DEPLOYMENT_CONFIG && !apiClient.baseURL.includes(window.DEPLOYMENT_CONFIG.BACKEND_URL)) {
         apiClient.baseURL = window.DEPLOYMENT_CONFIG.BACKEND_URL + '/api';
-        console.log('API Client URL updated from deployment config:', apiClient.baseURL);
+        console.log('API Client URL updated from deployment config (on load):', apiClient.baseURL);
+    }
+});
+
+// Update when deployment config script finishes loading
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.DEPLOYMENT_CONFIG && !apiClient.baseURL.includes(window.DEPLOYMENT_CONFIG.BACKEND_URL)) {
+        apiClient.baseURL = window.DEPLOYMENT_CONFIG.BACKEND_URL + '/api';
+        console.log('API Client URL updated from deployment config (DOM ready):', apiClient.baseURL);
     }
 });
 
