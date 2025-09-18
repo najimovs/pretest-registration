@@ -14,9 +14,7 @@ class AdminPaymentDashboard {
 
     async loadPaymentData() {
         try {
-            console.log('Loading payment data...');
             const response = await apiClient.getAllRegistrations();
-            console.log('Payment data response:', response);
             // Loading payment data
 
             // Extract payment data from registrations
@@ -254,23 +252,18 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         // Check admin authentication
         const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
-        console.log('Admin session data:', adminSession);
 
         if (!adminSession.token) {
-            console.log('No admin token found, redirecting to login');
             window.location.href = 'login.html';
             return;
         }
 
         // Check if token is expired (temporarily disabled like in admin-dashboard.js)
         if (false && adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
-            console.log('Admin token expired, redirecting to login');
             localStorage.removeItem('adminSession');
             window.location.href = 'login.html';
             return;
         }
-
-        console.log('Admin authenticated, initializing payment dashboard');
         paymentDashboard = new AdminPaymentDashboard();
     }, 100);
 });
