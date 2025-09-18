@@ -5,7 +5,7 @@ function loadBookingDetails() {
     const scheduleData = JSON.parse(localStorage.getItem('tempOfflineSchedule') || '{}');
     
     if (scheduleData.mainTest) {
-        const mainDate = new Date(scheduleData.mainTest.date);
+        const mainDate = new Date(scheduleData.mainTest.date + 'T00:00:00');
         const mainTime = scheduleData.mainTest.time;
         
         document.getElementById('confirm-main-date').textContent = formatDate(mainDate);
@@ -13,7 +13,7 @@ function loadBookingDetails() {
     }
     
     if (scheduleData.speakingTest) {
-        const speakingDate = new Date(scheduleData.speakingTest.date);
+        const speakingDate = new Date(scheduleData.speakingTest.date + 'T00:00:00');
         const speakingTime = scheduleData.speakingTest.time;
         
         document.getElementById('confirm-speaking-date').textContent = formatDate(speakingDate);

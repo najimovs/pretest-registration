@@ -488,7 +488,7 @@ function checkOfflineTestRestriction() {
     // Only block if user has PAID test scheduled (not just pending payment)
     if (testSchedule.date && testSchedule.time && testSchedule.paymentStatus === 'completed') {
         // Check if test date has passed
-        const testDate = new Date(testSchedule.date);
+        const testDate = new Date(testSchedule.date + 'T00:00:00');
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -512,7 +512,7 @@ function checkOfflineTestRestriction() {
     // Also check if user has pending payment - redirect to payment page
     const pendingSchedule = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
     if (pendingSchedule.date && pendingSchedule.time && pendingSchedule.registrationId) {
-        const formattedDate = new Date(pendingSchedule.date).toLocaleDateString('en-US', {
+        const formattedDate = new Date(pendingSchedule.date + 'T00:00:00').toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

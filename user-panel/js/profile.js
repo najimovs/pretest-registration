@@ -77,7 +77,7 @@ function startTest() {
 
     if (testSchedule.date && testSchedule.time) {
         // Check if test date has passed
-        const testDate = new Date(testSchedule.date);
+        const testDate = new Date(testSchedule.date + 'T00:00:00');
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -97,7 +97,7 @@ function startTest() {
 
 // Show test details modal (updated for simplified format)
 function showTestDetails(scheduleData, isRestricted = false) {
-    const testDate = new Date(scheduleData.date);
+    const testDate = new Date(scheduleData.date + 'T00:00:00');
     const testDateStr = formatTestDate(testDate);
 
     // Add restriction message if test is still scheduled
@@ -554,7 +554,7 @@ function scheduleTest() {
 
     if (testSchedule.date && testSchedule.time) {
         // Check if test date has passed
-        const testDate = new Date(testSchedule.date);
+        const testDate = new Date(testSchedule.date + 'T00:00:00');
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -667,7 +667,7 @@ function updateScheduleButton() {
     let hasActiveTest = false;
 
     if (testSchedule.date && testSchedule.time) {
-        const testDate = new Date(testSchedule.date);
+        const testDate = new Date(testSchedule.date + 'T00:00:00');
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 

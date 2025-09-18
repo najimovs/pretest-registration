@@ -29,7 +29,8 @@ function loadScheduleData() {
     }
 
     if (scheduleData.date && scheduleData.time) {
-        const testDate = new Date(scheduleData.date);
+        // Fix timezone issue - add 'T00:00:00' to treat as local date
+        const testDate = new Date(scheduleData.date + 'T00:00:00');
 
         document.getElementById('main-test-date').textContent = formatDate(testDate);
         document.getElementById('main-test-time').textContent = scheduleData.time;
