@@ -52,7 +52,7 @@ class APIClient {
                 if (response.status === 401 && adminSession.token) {
                     console.log('401 Unauthorized - clearing session and redirecting to login');
                     localStorage.removeItem('adminSession');
-                    window.location.href = './login.html';
+                    window.location.href = 'login.html';
                     return;
                 }
                 throw new Error(data.message || 'API request failed');

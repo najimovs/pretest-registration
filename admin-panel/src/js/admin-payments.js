@@ -243,24 +243,30 @@ function exportPaymentsToExcel() {
 
 function adminLogout() {
     localStorage.removeItem('adminSession');
-    window.location.href = './login.html';
+    window.location.href = 'login.html';
 }
 
 // Initialize dashboard when page loads
 document.addEventListener('DOMContentLoaded', () => {
-    // Check admin authentication
-    const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
-    if (!adminSession.token) {
-        window.location.href = './login.html';
-        return;
-    }
+    // Small delay to ensure deployment-config.js loads first
+    setTimeout(() => {
+        // Check admin authentication
+        const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
+        if (!adminSession.token) {
+            console.log('No admin token found, redirecting to login');
+            window.location.href = 'login.html';
+            return;
+        }
 
-    // Check if token is expired
-    if (adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
-        localStorage.removeItem('adminSession');
-        window.location.href = './login.html';
-        return;
-    }
+        // Check if token is expired
+        if (adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
+            console.log('Admin token expired, redirecting to login');
+            localStorage.removeItem('adminSession');
+            window.location.href = 'login.html';
+            return;
+        }
 
-    paymentDashboard = new AdminPaymentDashboard();
+        console.log('Admin authenticated, initializing payment dashboard');
+        paymentDashboard = new AdminPaymentDashboard();
+    }, 100);
 });

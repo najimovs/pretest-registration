@@ -356,7 +356,7 @@ function exportToWord() {
 
 function adminLogout() {
     localStorage.removeItem('adminSession');
-    window.location.href = './login.html';
+    window.location.href = 'login.html';
 }
 
 // Manual refresh function
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check admin authentication
     const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
     if (!adminSession.token) {
-        window.location.href = './login.html';
+        window.location.href = 'login.html';
         return;
     }
 
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (now > expiryWithBuffer) {
             console.log('Token expired, redirecting to login');
             localStorage.removeItem('adminSession');
-            window.location.href = './login.html';
+            window.location.href = 'login.html';
             return;
         }
     }
