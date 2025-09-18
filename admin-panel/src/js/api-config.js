@@ -1,8 +1,13 @@
 // API Configuration and Client
 class APIClient {
     constructor() {
-        this.baseURL = 'http://localhost:8000/api';
+        // Use deployment config if available, otherwise fallback to localhost
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const backendUrl = isDevelopment ? 'http://localhost:8000' : 'https://pretest-registration.onrender.com';
+        this.baseURL = `${backendUrl}/api`;
         this.isOfflineMode = false; // Now using real backend
+
+        console.log('API Client initialized with baseURL:', this.baseURL);
     }
 
     async request(endpoint, options = {}) {
@@ -133,6 +138,14 @@ class APIClient {
 
 // Create global instance
 const apiClient = new APIClient();
+
+// Update API base URL when deployment config is loaded
+window.addEventListener('load', () => {
+    if (window.DEPLOYMENT_CONFIG) {
+        apiClient.baseURL = window.DEPLOYMENT_CONFIG.BACKEND_URL + '/api';
+        console.log('API Client URL updated from deployment config:', apiClient.baseURL);
+    }
+});
 
 // Export for ES modules (if needed)
 if (typeof module !== 'undefined' && module.exports) {
