@@ -21,8 +21,10 @@ window.navigateToAdminPanel = function() {
     window.open(config.ADMIN_PANEL_URL, '_blank');
 };
 
+// Force production config for now since localhost backend isn't running
 // Auto-detect environment
-const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isDevelopment = false; // Temporarily forced to false
+// const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const config = isDevelopment ? DEPLOYMENT_CONFIG.development : DEPLOYMENT_CONFIG.production;
 
 // Log environment detection for debugging
@@ -40,6 +42,10 @@ window.DEPLOYMENT_CONFIG = config;
 // Update API base URL dynamically
 if (typeof apiClient !== 'undefined') {
     apiClient.baseURL = config.BACKEND_URL + '/api';
+    console.log('Updated API client baseURL to:', apiClient.baseURL);
 }
+
+// Also set it for when APIClient is initialized later
+window.deploymentConfig = config;
 
 console.log('Deployment Config Loaded:', config);

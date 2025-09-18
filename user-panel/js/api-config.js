@@ -1,11 +1,11 @@
 // API Configuration and Client
 class APIClient {
     constructor() {
-        // Use deployment config or default to localhost for development
-        const deploymentConfig = window.deploymentConfig || {};
+        // Use deployment config or fallback to production
+        const deploymentConfig = window.DEPLOYMENT_CONFIG || window.deploymentConfig || {};
         this.baseURL = deploymentConfig.BACKEND_URL ?
             `${deploymentConfig.BACKEND_URL}/api` :
-            'http://localhost:8000/api';
+            'https://pretest-registration.onrender.com/api'; // Fallback to production
         this.isOfflineMode = false; // Now using real backend
         console.log('API Client using baseURL:', this.baseURL);
     }

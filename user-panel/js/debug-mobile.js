@@ -11,6 +11,28 @@ class MobileDebugger {
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const forceDebug = urlParams.get('debug') === 'true';
 
+        // Also enable if triple-tapping anywhere on screen
+        let tapCount = 0;
+        let tapTimer = null;
+
+        document.addEventListener('touchstart', () => {
+            tapCount++;
+            if (tapCount === 1) {
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 500);
+            } else if (tapCount === 3) {
+                clearTimeout(tapTimer);
+                tapCount = 0;
+                this.createDebugInterface(); // Force create if not already created
+                if (this.logContainer) {
+                    this.toggleDebugPanel();
+                    this.log('Debug panel activated by triple-tap! 🎉', 'success');
+                }
+                return;
+            }
+        });
+
         if (!isMobile && !forceDebug) return;
 
         // Create floating debug button
