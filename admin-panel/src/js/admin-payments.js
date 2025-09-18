@@ -262,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Check if token is expired
-        if (adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
+        // Check if token is expired (temporarily disabled like in admin-dashboard.js)
+        if (false && adminSession.expiresAt && new Date() > new Date(adminSession.expiresAt)) {
             console.log('Admin token expired, redirecting to login');
             localStorage.removeItem('adminSession');
             window.location.href = 'login.html';
