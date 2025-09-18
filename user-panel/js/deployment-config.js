@@ -25,6 +25,15 @@ window.navigateToAdminPanel = function() {
 const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const config = isDevelopment ? DEPLOYMENT_CONFIG.development : DEPLOYMENT_CONFIG.production;
 
+// Log environment detection for debugging
+console.log('Environment detection:', {
+    hostname: window.location.hostname,
+    isDevelopment,
+    selectedConfig: config,
+    userAgent: navigator.userAgent,
+    isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+});
+
 // Export configuration
 window.DEPLOYMENT_CONFIG = config;
 

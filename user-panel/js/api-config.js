@@ -22,11 +22,21 @@ class APIClient {
                 ...(token && { 'Authorization': `Bearer ${token}` }),
                 ...options.headers,
             },
+            // Add timeout for mobile networks
+            signal: AbortSignal.timeout(30000), // 30 seconds timeout
             ...options,
         };
 
+        console.log('Making API request:', { url, method: config.method || 'GET', baseURL: this.baseURL });
+
         try {
             const response = await fetch(url, config);
+            console.log('API response received:', { status: response.status, url });
+
+            if (!response.ok) {
+                console.error('Response not OK:', { status: response.status, statusText: response.statusText });
+            }
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -53,7 +63,22 @@ class APIClient {
 
             return data;
         } catch (error) {
-            console.error('API request error:', error);
+            console.error('API request error:', {
+                error: error.message,
+                url,
+                type: error.name,
+                isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+            });
+
+            // Handle specific mobile network errors
+            if (error.name === 'AbortError') {
+                throw new Error('Request timeout. Please check your internet connection and try again.');
+            }
+
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                throw new Error('Network error. Please check your internet connection.');
+            }
+
             throw error;
         }
     }

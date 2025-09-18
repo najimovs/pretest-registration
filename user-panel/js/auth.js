@@ -326,11 +326,23 @@ async function handleLogin(e) {
     setLoadingState(submitBtn, true);
     
     try {
-        // Call backend API
-        const response = await apiClient.login({
+        // Test network connection first on mobile
+        if (window.networkHelper && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            const connectionTest = await networkHelper.testBackendConnection();
+            if (!connectionTest.success) {
+                throw new Error(connectionTest.error);
+            }
+        }
+
+        // Call backend API with retry logic
+        const loginOperation = () => apiClient.login({
             phone: `+998${phone}`,
             password: password
         });
+
+        const response = window.networkHelper ?
+            await networkHelper.retryOperation(loginOperation, 2, 1000) :
+            await loginOperation();
         
         if (response.success) {
             // Store user data, registration info, and JWT token
