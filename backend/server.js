@@ -47,6 +47,10 @@ const corsOptions = {
     else if (origin && origin.endsWith('.netlify.app')) {
       callback(null, true);
     }
+    // Allow any Vercel app domains
+    else if (origin && (origin.endsWith('.vercel.app') || origin.endsWith('.vercel.com'))) {
+      callback(null, true);
+    }
     else {
       logger.warn(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
