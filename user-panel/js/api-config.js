@@ -185,8 +185,21 @@ class APIClient {
     }
 
     logout() {
+        // Remove user and auth data
         localStorage.removeItem('currentUser');
         localStorage.removeItem('authToken');
+
+        // Remove all schedule and registration data
+        localStorage.removeItem('testSchedule');
+        localStorage.removeItem('offlineSchedule');
+        localStorage.removeItem('pendingSchedule');
+        localStorage.removeItem('tempOfflineSchedule');
+        localStorage.removeItem('selectedPlan');
+        localStorage.removeItem('registrationId');
+        localStorage.removeItem('currentRegistration');
+        localStorage.removeItem('offlineTestData');
+        localStorage.removeItem('currentTestSession');
+        localStorage.removeItem('users');
     }
 
     isAuthenticated() {

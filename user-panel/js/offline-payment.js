@@ -369,9 +369,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Cancel payment and clear pending schedule
 function cancelPayment() {
-    // Clear pending schedule data since user cancelled
+    // Clear ALL schedule and plan data since user cancelled
     localStorage.removeItem('pendingSchedule');
     localStorage.removeItem('registrationId');
+    localStorage.removeItem('selectedPlan');
+    localStorage.removeItem('tempOfflineSchedule');
+    localStorage.removeItem('testSchedule');
+    localStorage.removeItem('offlineSchedule');
 
     // Redirect to profile page
     window.location.href = 'profile.html';

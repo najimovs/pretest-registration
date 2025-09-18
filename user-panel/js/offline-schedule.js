@@ -555,6 +555,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Scroll to top when page loads
     window.scrollTo(0, 0);
 
+    // Check if plan is selected first
+    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+    if (!selectedPlan.name || !selectedPlan.price) {
+        // No plan selected, redirect to plans page
+        window.location.href = 'plans.html';
+        return;
+    }
+
     // Display selected plan if available
     displaySelectedPlan();
 

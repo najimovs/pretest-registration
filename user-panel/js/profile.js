@@ -54,8 +54,24 @@ function closeAlert() {
 }
 
 function confirmLogout() {
-    // Clear user session data
-    localStorage.removeItem('currentUser');
+    // Use the centralized logout function for complete cleanup
+    if (window.authManager && typeof window.authManager.logout === 'function') {
+        window.authManager.logout();
+    } else {
+        // Fallback: clear all user data manually
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('testSchedule');
+        localStorage.removeItem('offlineSchedule');
+        localStorage.removeItem('pendingSchedule');
+        localStorage.removeItem('tempOfflineSchedule');
+        localStorage.removeItem('selectedPlan');
+        localStorage.removeItem('registrationId');
+        localStorage.removeItem('currentRegistration');
+        localStorage.removeItem('offlineTestData');
+        localStorage.removeItem('currentTestSession');
+        localStorage.removeItem('users');
+    }
     // Redirect to home page (correct path from user folder)
     window.location.href = '../../index.html';
 }
