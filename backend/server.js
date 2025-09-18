@@ -13,6 +13,9 @@ dotenv.config({ path: '../.env' });
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// ✅ Render / Heroku kabi platformalarda proxy orqasida IP olish uchun
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDatabase();
 
@@ -167,4 +170,3 @@ app.listen(PORT, () => {
   });
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
