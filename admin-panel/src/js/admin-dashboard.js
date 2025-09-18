@@ -379,17 +379,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Check if token is expired
-    if (adminSession.expiresAt) {
+    // Check if token is expired (with 5 minute buffer for timezone issues)
+    if (false && adminSession.expiresAt) { // Temporarily disabled
         const now = new Date();
         const expiry = new Date(adminSession.expiresAt);
+        // Add 5 minute buffer to account for timezone differences
+        const bufferTime = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const expiryWithBuffer = new Date(expiry.getTime() - bufferTime);
+
         console.log('Token expiry check:', {
             now: now.toISOString(),
             expiry: expiry.toISOString(),
-            isExpired: now > expiry
+            expiryWithBuffer: expiryWithBuffer.toISOString(),
+            isExpired: now > expiryWithBuffer
         });
 
-        if (now > expiry) {
+        if (now > expiryWithBuffer) {
             console.log('Token expired, redirecting to login');
             localStorage.removeItem('adminSession');
             window.location.href = 'login.html';

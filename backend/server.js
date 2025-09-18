@@ -25,6 +25,7 @@ const allowedOrigins = [
   process.env.ADMIN_PANEL_URL,
   'https://whimsical-sprite-8f17d6.netlify.app',
   'https://admin.pretest-uzbekistan.uz',
+  'http://admin.pretest-uzbekistan.uz',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
