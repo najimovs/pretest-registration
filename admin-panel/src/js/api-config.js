@@ -31,12 +31,26 @@ class APIClient {
         };
 
         try {
+            console.log('API Request:', {
+                url,
+                method: config.method || 'GET',
+                headers: config.headers,
+                baseURL: this.baseURL
+            });
+
             const response = await fetch(url, config);
             const data = await response.json();
+
+            console.log('API Response:', {
+                status: response.status,
+                ok: response.ok,
+                data
+            });
 
             if (!response.ok) {
                 // Handle token expiration
                 if (response.status === 401 && adminSession.token) {
+                    console.log('401 Unauthorized - clearing session and redirecting to login');
                     localStorage.removeItem('adminSession');
                     window.location.href = 'login.html';
                     return;
