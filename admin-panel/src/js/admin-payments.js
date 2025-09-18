@@ -14,7 +14,9 @@ class AdminPaymentDashboard {
 
     async loadPaymentData() {
         try {
+            console.log('Loading payment data...');
             const response = await apiClient.getAllRegistrations();
+            console.log('Payment data response:', response);
             // Loading payment data
 
             // Extract payment data from registrations
@@ -252,6 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         // Check admin authentication
         const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
+        console.log('Admin session data:', adminSession);
+
         if (!adminSession.token) {
             console.log('No admin token found, redirecting to login');
             window.location.href = 'login.html';
