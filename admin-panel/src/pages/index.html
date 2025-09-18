@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - IELTS Registration</title>
     <link rel="stylesheet" href="../css/admin-styles.css">
+    <style>
+        body { display: none; }
+        body.authenticated { display: block; }
+    </style>
 </head>
 <body>
     <div class="header">
@@ -111,6 +115,8 @@
         const adminSession = JSON.parse(localStorage.getItem('adminSession') || '{}');
         if (!adminSession.token) {
             window.location.href = 'login.html';
+        } else {
+            document.body.className = 'authenticated';
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
