@@ -21,19 +21,12 @@ class AdminPaymentDashboard {
             this.payments = response.data.registrations
                 .filter(registration => {
                     // Only include registrations that have completed payment
-                    return registration.paymentStatus === 'completed';
+                    return registration.paymentStatus === 'completed' && registration.schedule;
                 })
                 .map(registration => {
-                    // Transform registration data to payment format
                     const schedule = registration.schedule;
-                    const testDate = schedule?.date ||
-                                   (schedule?.mainTest ? schedule.mainTest.date : null);
-
-                    // Get actual payment status from registration
-                    const paymentStatus = registration.paymentStatus || 'pending';
-                    const paymentDate = registration.paymentInfo?.completedAt ||
-                                      schedule?.paidAt ||
-                                      registration.createdAt;
+                    const testDate = schedule?.date || (schedule?.mainTest ? schedule.mainTest.date : null);
+                    const paymentDate = registration.paymentInfo?.completedAt || schedule?.paidAt || registration.createdAt;
 
                     return {
                         id: registration._id,
@@ -43,9 +36,9 @@ class AdminPaymentDashboard {
                             phone: registration.user.phone
                         },
                         testDate: testDate,
-                        amount: '2,000 UZS',
-                        paymentMethod: schedule?.paymentMethod || 'click',
-                        paymentStatus: paymentStatus,
+                        planName: schedule.planName || 'N/A',
+                        amount: schedule.price || 0,
+                        paymentStatus: registration.paymentStatus,
                         paymentDate: paymentDate,
                         createdAt: registration.createdAt
                     };
@@ -64,14 +57,14 @@ class AdminPaymentDashboard {
     }
 
     updateAnalytics() {
-        // Calculate revenue only from completed payments
-        const completedPayments = this.payments.filter(p => p.paymentStatus === 'completed');
-        const totalRevenue = completedPayments.length * 2000;
+        const completedPayments = this.payments; // Already filtered in loadPaymentData
+        
+        const totalRevenue = completedPayments.reduce((sum, p) => sum + p.amount, 0);
         document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString()} UZS`;
 
         // Payment method breakdown (only Click now)
         const clickPayments = completedPayments.length;
-        const totalTransactions = this.payments.length;
+        const totalTransactions = completedPayments.length;
 
         document.getElementById('clickPayments').textContent = clickPayments;
         document.getElementById('totalTransactions').textContent = totalTransactions;
@@ -105,6 +98,7 @@ class AdminPaymentDashboard {
         const row = document.createElement('tr');
 
         const formatDate = (dateStr) => {
+            if (!dateStr) return 'Not set';
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', {
                 year: 'numeric',
@@ -133,20 +127,15 @@ class AdminPaymentDashboard {
             return `<span class="payment-status ${statusClasses[status] || 'pending'}">${status || 'pending'}</span>`;
         };
 
-        const getMethodBadge = (method) => {
-            // Only support Click now
-            return `<span class="payment-method-badge click">Click</span>`;
-        };
-
         row.innerHTML = `
             <td style="font-weight: bold; text-align: center;">${rowNumber}</td>
             <td>
                 <div class="student-info">${payment.student.firstName} ${payment.student.lastName}</div>
                 <div class="student-phone">${payment.student.phone}</div>
             </td>
-            <td class="date-cell">${payment.testDate ? formatDate(payment.testDate) : 'Not set'}</td>
-            <td class="amount-cell">${payment.amount}</td>
-            <td>${getMethodBadge(payment.paymentMethod)}</td>
+            <td class="date-cell">${formatDate(payment.testDate)}</td>
+            <td>${payment.planName}</td>
+            <td class="amount-cell">${payment.amount.toLocaleString()} UZS</td>
             <td>${getStatusBadge(payment.paymentStatus)}</td>
             <td class="date-cell">${formatDateTime(payment.paymentDate)}</td>
         `;

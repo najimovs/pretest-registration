@@ -71,12 +71,14 @@ class AdminDashboard {
     }
 
     updateStatistics() {
-        // Count registrations with scheduled tests (have date and time)
         const scheduled = this.registrations.length;
         document.getElementById('scheduledTests').textContent = scheduled;
 
-        // All scheduled tests are paid (50,000 UZS each)
-        const totalRevenue = scheduled * 50000;
+        // Calculate total revenue from actual schedule prices
+        const totalRevenue = this.registrations.reduce((sum, reg) => {
+            return sum + (reg.schedule?.price || 0);
+        }, 0);
+
         document.getElementById('totalRevenue').textContent = `${totalRevenue.toLocaleString()} UZS`;
     }
 
@@ -90,20 +92,17 @@ class AdminDashboard {
 
         if (this.registrations.length === 0) {
             emptyState.style.display = 'block';
+            table.style.display = 'none';
             return;
         }
 
         table.style.display = 'table';
+        emptyState.style.display = 'none';
         tbody.innerHTML = '';
 
-        // Assign continuous row numbers to new registrations
-        this.registrations.forEach((registration) => {
-            // If registration doesn't have a row number, assign the next available one
-            if (!registration.rowNumber) {
-                registration.rowNumber = this.nextRowNumber++;
-            }
-
-            const row = this.createTableRow(registration, registration.rowNumber);
+        // Simplified row numbering
+        this.registrations.forEach((registration, index) => {
+            const row = this.createTableRow(registration, index + 1); // Use index + 1 for row number
             tbody.appendChild(row);
         });
     }
@@ -151,6 +150,8 @@ class AdminDashboard {
             <td>${user.firstName} ${user.lastName}</td>
             <td>${user.phone}</td>
             <td>${testScheduleDisplay}</td>
+            <td>${schedule ? schedule.planName || 'N/A' : 'N/A'}</td>
+            <td>${schedule ? (schedule.price ? `${schedule.price.toLocaleString()} UZS` : 'N/A') : 'N/A'}</td>
             <td>${getPaymentBadge()}</td>
             <td>${new Date(registration.createdAt).toLocaleDateString()}</td>
             <td>${getStatusBadge(registration.status)}</td>

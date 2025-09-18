@@ -166,3 +166,5 @@ https://my.click.uz/services/pay?service_id=<SERVICE_ID>&merchant_id=<MERCHANT_I
   - Secondary: Click Button (for Click users)
 
   Ready to implement as soon as you get the MERCHANT_ID and API keys from the Click team!
+  the click team is very good now, and also when you just got .
+  

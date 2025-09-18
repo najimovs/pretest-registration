@@ -10,7 +10,6 @@ import paymentRoutes from './routes/payments.js';
 import logger from './utils/logger.js';
 
 dotenv.config({ path: '../.env' });
-
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -167,3 +166,4 @@ app.listen(PORT, () => {
   });
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
