@@ -423,7 +423,7 @@ function sendForgotPasswordSMS() {
 
 
 // Custom Alert Function
-function showSimpleAlert(message, type = 'error', title = null) {
+function showCustomAlert(message, type = 'error', title = null) {
     // Remove existing alert if any
     const existingAlert = document.querySelector('.custom-alert-overlay');
     if (existingAlert) {
