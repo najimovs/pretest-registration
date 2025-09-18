@@ -25,8 +25,6 @@ const allowedOrigins = [
   process.env.ADMIN_PANEL_URL,
   'https://whimsical-sprite-8f17d6.netlify.app',
   'https://admin.pretest-uzbekistan.uz',
-  // Add any subdomains you're using
-  'https://your-admin-subdomain.netlify.app', // Replace with your actual subdomain
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
@@ -40,9 +38,16 @@ const allowedOrigins = [
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true); // mobile apps, curl, etc.
+
+    // Allow specific origins
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
-    } else {
+    }
+    // Allow any netlify.app subdomain
+    else if (origin && origin.endsWith('.netlify.app')) {
+      callback(null, true);
+    }
+    else {
       logger.warn(`CORS blocked request from origin: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
