@@ -358,14 +358,25 @@ async function handleLogin(e) {
                 showToast('Welcome back! Your test is scheduled.');
 
                 setTimeout(() => {
-                    // Redirect to profile page
-                    window.location.href = './profile.html';
+                    // Check if user has a selected plan, if not redirect to plans
+                    const selectedPlan = localStorage.getItem('selectedPlan');
+                    if (selectedPlan) {
+                        window.location.href = './profile.html';
+                    } else {
+                        window.location.href = './plans.html';
+                    }
                 }, 1500);
             } else {
                 showToast('Login successful!');
 
                 setTimeout(() => {
-                    window.location.href = './profile.html';
+                    // Check if user has a selected plan, if not redirect to plans
+                    const selectedPlan = localStorage.getItem('selectedPlan');
+                    if (selectedPlan) {
+                        window.location.href = './profile.html';
+                    } else {
+                        window.location.href = './plans.html';
+                    }
                 }, 1500);
             }
         } else {
@@ -491,9 +502,9 @@ async function handleSignup(e) {
 
             showToast('Account created successfully!');
 
-            // Redirect to profile page instead of schedule page
+            // Redirect to plans page to select tariff
             setTimeout(() => {
-                window.location.href = './profile.html';
+                window.location.href = './plans.html';
             }, 1500);
         } else {
             // Check if it's a phone already exists error

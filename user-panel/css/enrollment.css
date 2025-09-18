@@ -487,6 +487,71 @@ body {
     }
 }
 
+/* Plan Summary Styles */
+.plan-summary {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    padding: 0 20px;
+}
+
+.plan-summary-content {
+    background: linear-gradient(135deg, #1A2B6C 0%, #2c3e50 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 25px 30px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(26, 43, 108, 0.3);
+}
+
+.plan-summary-content h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.selected-plan-details {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.selected-plan-details .plan-name {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.selected-plan-details .plan-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #10B981;
+}
+
+@media (max-width: 768px) {
+    .plan-summary {
+        padding: 0 15px;
+    }
+
+    .plan-summary-content {
+        padding: 20px;
+    }
+
+    .selected-plan-details {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .selected-plan-details .plan-name {
+        font-size: 1.6rem;
+    }
+
+    .selected-plan-details .plan-price {
+        font-size: 1.5rem;
+    }
+}
+
 /* Offline Schedule Styles */
 .schedule-section {
     max-width: 1200px;

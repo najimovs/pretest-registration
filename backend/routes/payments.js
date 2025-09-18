@@ -214,18 +214,7 @@ router.post('/click/prepare', async (req, res) => {
       });
     }
 
-    // Validate amount
-    if (parseFloat(amount) !== APP_CONFIG.TEST_AMOUNT) {
-      return res.json({
-        click_trans_id: click_trans_id,
-        merchant_trans_id: merchant_trans_id,
-        merchant_prepare_id: null,
-        error: -2,
-        error_note: "Incorrect amount"
-      });
-    }
-
-    // Find registration by ID (merchant_trans_id should be registration ID)
+    // Find registration first to get the expected amount
     const registration = await Registration.findById(merchant_trans_id);
     if (!registration) {
       return res.json({
@@ -236,6 +225,22 @@ router.post('/click/prepare', async (req, res) => {
         error_note: "Order not found"
       });
     }
+
+    // Get expected amount from registration schedule data
+    const expectedAmount = registration.schedule?.price || APP_CONFIG.TEST_AMOUNT;
+
+    // Validate amount
+    if (parseFloat(amount) !== expectedAmount) {
+      return res.json({
+        click_trans_id: click_trans_id,
+        merchant_trans_id: merchant_trans_id,
+        merchant_prepare_id: null,
+        error: -2,
+        error_note: "Incorrect amount"
+      });
+    }
+
+    // Registration already found above during amount validation
 
     // Check if already paid
     if (registration.paymentStatus === 'completed') {
@@ -492,7 +497,7 @@ router.post('/click/complete', async (req, res) => {
 // Create payment URL endpoint for frontend
 router.post('/click/create-payment', validatePayment, async (req, res) => {
   try {
-    const { registrationId } = req.body;
+    const { registrationId, amount } = req.body;
 
     // Find registration by ID
     const registration = await Registration.findById(registrationId);
@@ -504,14 +509,14 @@ router.post('/click/create-payment', validatePayment, async (req, res) => {
       });
     }
 
-    // Create payment URLs
-    const amount = APP_CONFIG.TEST_AMOUNT;
+    // Use amount from request or fallback to default
+    const paymentAmount = amount || APP_CONFIG.TEST_AMOUNT;
     const transactionParam = `ielts_${registration._id}`;
 
     const paymentData = {
       // Click Button Payment - redirects to Click portal (as per Click docs)
       clickButton: {
-        url: `https://my.click.uz/services/pay?service_id=${CLICK_CONFIG.SERVICE_ID}&merchant_id=${CLICK_CONFIG.MERCHANT_ID}&amount=${amount}&transaction_param=${transactionParam}&merchant_user_id=${CLICK_CONFIG.MERCHANT_USER_ID}`,
+        url: `https://my.click.uz/services/pay?service_id=${CLICK_CONFIG.SERVICE_ID}&merchant_id=${CLICK_CONFIG.MERCHANT_ID}&amount=${paymentAmount}&transaction_param=${transactionParam}&merchant_user_id=${CLICK_CONFIG.MERCHANT_USER_ID}`,
         type: 'redirect'
       },
 
@@ -522,7 +527,7 @@ router.post('/click/create-payment', validatePayment, async (req, res) => {
           merchant_id: CLICK_CONFIG.MERCHANT_ID,
           service_id: CLICK_CONFIG.SERVICE_ID,
           transaction_param: transactionParam,
-          amount: amount,
+          amount: paymentAmount,
           merchant_user_id: CLICK_CONFIG.MERCHANT_USER_ID
         }
       }
@@ -532,7 +537,7 @@ router.post('/click/create-payment', validatePayment, async (req, res) => {
       success: true,
       data: {
         paymentData,
-        amount: amount,
+        amount: paymentAmount,
         registration: {
           id: registration._id,
           student: `${registration.user.firstName} ${registration.user.lastName}`,

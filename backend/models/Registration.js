@@ -11,7 +11,10 @@ const registrationSchema = new mongoose.Schema({
   },
   schedule: {
     date: { type: String, required: false, default: null },
-    time: { type: String, required: false, default: null }
+    time: { type: String, required: false, default: null },
+    planType: { type: String, required: false, default: null },
+    planName: { type: String, required: false, default: null },
+    price: { type: Number, required: false, default: null }
   },
   status: {
     type: String,

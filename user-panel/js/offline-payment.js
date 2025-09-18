@@ -8,10 +8,25 @@ const API_BASE_URL = window.deploymentConfig?.BACKEND_URL ?
     `${window.deploymentConfig.BACKEND_URL}/api` :
     'http://localhost:8000/api';
 
+// Format price with proper thousand separators
+function formatPrice(price) {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 // Load schedule data and display
 function loadScheduleData() {
     // Get schedule data from pending schedule (not final until paid)
     const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+
+    // Get selected plan for pricing
+    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+    const planPrice = selectedPlan.price || scheduleData.price || 250000; // Default to Standard if no plan
+
+    // Update the total amount display
+    const totalAmountElement = document.getElementById('total-amount');
+    if (totalAmountElement) {
+        totalAmountElement.textContent = formatPrice(planPrice) + ' UZS';
+    }
 
     if (scheduleData.date && scheduleData.time) {
         const testDate = new Date(scheduleData.date);
@@ -82,13 +97,19 @@ function checkFormComplete() {
 // Create payment URL via backend API
 async function createPaymentURL() {
     try {
+        // Get selected plan for pricing
+        const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+        const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+        const planPrice = selectedPlan.price || scheduleData.price || 250000; // Default to Standard if no plan
+
         const response = await fetch(`${API_BASE_URL}/payments/click/create-payment`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                registrationId: registrationId
+                registrationId: registrationId,
+                amount: planPrice // Send the actual amount to backend
             })
         });
 
@@ -126,8 +147,11 @@ async function proceedToConfirmation() {
 
         // Store payment info in pending schedule
         const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+        const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+        const planPrice = selectedPlan.price || scheduleData.price || 250000; // Default to Standard if no plan
+
         scheduleData.paymentMethod = selectedPaymentMethod;
-        scheduleData.paymentAmount = '2,000 UZS';
+        scheduleData.paymentAmount = formatPrice(planPrice) + ' UZS';
         scheduleData.paymentStatus = 'initiated';
         scheduleData.registrationId = registrationId;
         localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));

@@ -291,10 +291,17 @@ async function proceedToTestDetails() {
         return `${year}-${month}-${day}`;
     };
 
+    // Get selected plan for pricing
+    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+    const planPrice = selectedPlan.price || 250000; // Default to Standard price if no plan selected
+
     const scheduleData = {
         date: formatDateLocal(mainTestSchedule.date), // Format as YYYY-MM-DD without timezone issues
         time: mainTestSchedule.time,
         center: 'Pretest Center',
+        planType: selectedPlan.type || 'standard',
+        planName: selectedPlan.name || 'Standard',
+        price: planPrice,
         registeredAt: new Date().toISOString()
     };
 
@@ -529,10 +536,34 @@ function checkOfflineTestRestriction() {
     return false;
 }
 
+// Display selected plan
+function displaySelectedPlan() {
+    const selectedPlan = JSON.parse(localStorage.getItem('selectedPlan') || '{}');
+
+    if (selectedPlan.name && selectedPlan.price) {
+        const planSummary = document.getElementById('planSummary');
+        const planName = document.getElementById('selectedPlanName');
+        const planPrice = document.getElementById('selectedPlanPrice');
+
+        planName.textContent = selectedPlan.name + ' Package';
+        planPrice.textContent = formatPrice(selectedPlan.price) + ' UZS';
+
+        planSummary.style.display = 'block';
+    }
+}
+
+// Format price with proper thousand separators
+function formatPrice(price) {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Scroll to top when page loads
     window.scrollTo(0, 0);
+
+    // Display selected plan if available
+    displaySelectedPlan();
 
     // Check for offline test restriction first
     if (checkOfflineTestRestriction()) {

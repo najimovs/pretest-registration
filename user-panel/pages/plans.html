@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Plans - Choose Your Package</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1A2B6C 0%, #0f1729 50%, #000000 100%);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .plans-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .plans-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .plans-header h1 {
+            font-size: clamp(2.2rem, 4vw, 3.2rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .plans-header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            align-items: stretch;
+        }
+
+        .plan-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Card Top Bars */
+        .standard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #64748b, #94a3b8);
+        }
+
+        .premium-card {
+            border: 2px solid rgba(26, 43, 108, 0.3);
+            transform: scale(1.05);
+        }
+
+        .premium-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1A2B6C, #3b82f6);
+        }
+
+        .premium-card:hover {
+            transform: translateY(-8px) scale(1.07);
+        }
+
+        .vip-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #dc2626, #ef4444, #f87171, #ef4444, #dc2626);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .recommended-badge {
+            position: absolute;
+            /* top: 0px; */
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1A2B6C, #3b82f6);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(26, 43, 108, 0.3);
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .plan-header {
+            padding: 32px 24px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .premium-card .plan-header {
+            padding-top: 44px;
+        }
+
+        .plan-name {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: -0.01em;
+        }
+
+        .standard-card .plan-name {
+            color: #475569;
+        }
+
+        .premium-card .plan-name {
+            background: linear-gradient(135deg, #1A2B6C, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .vip-card .plan-name {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .plan-price {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            letter-spacing: -0.01em;
+        }
+
+        .plan-price .currency {
+            font-size: 1rem;
+            font-weight: 600;
+            opacity: 0.7;
+        }
+
+        .standard-card .plan-price {
+            color: #475569;
+        }
+
+        .premium-card .plan-price {
+            color: #1A2B6C;
+        }
+
+        .vip-card .plan-price {
+            color: #dc2626;
+        }
+
+        .plan-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .plan-content {
+            padding: 0 24px 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #334155;
+        }
+
+        .feature-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            margin-top: 1px;
+            font-size: 10px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .standard-card .feature-icon {
+            background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+            color: white;
+        }
+
+        .premium-card .feature-icon {
+            background: linear-gradient(135deg, #1A2B6C, #3b82f6);
+            color: white;
+        }
+
+        .vip-card .feature-icon {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+        }
+
+        .feature-text {
+            flex: 1;
+        }
+
+        .feature-highlight {
+            display: block;
+            margin-top: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .premium-card .feature-highlight {
+            background: rgba(26, 43, 108, 0.1);
+            color: #1A2B6C;
+            border: 1px solid rgba(26, 43, 108, 0.2);
+        }
+
+        .vip-card .feature-highlight {
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .plan-extra {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-left: 3px solid;
+            font-size: 11px;
+        }
+
+        .premium-extra {
+            border-left-color: #1A2B6C;
+            background: rgba(26, 43, 108, 0.05);
+        }
+
+        .vip-extra {
+            border-left-color: #dc2626;
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .extra-title {
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .premium-extra .extra-title {
+            color: #1A2B6C;
+        }
+
+        .vip-extra .extra-title {
+            color: #dc2626;
+        }
+
+        .extra-list {
+            list-style: none;
+        }
+
+        .extra-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+            font-size: 10px;
+            color: #475569;
+            line-height: 1.3;
+        }
+
+        .extra-list li::before {
+            content: '→';
+            margin-right: 6px;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .premium-extra .extra-list li::before {
+            color: #1A2B6C;
+        }
+
+        .vip-extra .extra-list li::before {
+            color: #dc2626;
+        }
+
+        .plan-button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .plan-button:hover::before {
+            left: 100%;
+        }
+
+        .standard-card .plan-button {
+            background: linear-gradient(135deg, #64748b, #94a3b8);
+            color: white;
+            box-shadow: 0 6px 20px rgba(100, 116, 139, 0.3);
+        }
+
+        .standard-card .plan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(100, 116, 139, 0.4);
+        }
+
+        .premium-card .plan-button {
+            background: linear-gradient(135deg, #1A2B6C, #3b82f6);
+            color: white;
+            box-shadow: 0 6px 20px rgba(26, 43, 108, 0.4);
+        }
+
+        .premium-card .plan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(26, 43, 108, 0.5);
+        }
+
+        .vip-card .plan-button {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+            color: white;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .vip-card .plan-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .plans-grid {
+                gap: 20px;
+            }
+            
+            .plan-card {
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .plans-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                max-width: 400px;
+            }
+
+            .premium-card {
+                transform: none;
+            }
+
+            .premium-card:hover {
+                transform: translateY(-8px) scale(1.02);
+            }
+
+            .plan-card {
+                height: auto;
+                min-height: 450px;
+            }
+
+            body {
+                justify-content: flex-start;
+                padding-top: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .plan-header,
+            .plan-content {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+
+        /* Animation on load */
+        .plan-card {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideInUp 0.6s ease forwards;
+        }
+
+        .plan-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .plan-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .plan-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes slideInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="plans-container">
+        <!-- <div class="plans-header">
+            <h1>Choose Your IELTS Plan</h1>
+            <p>Unlock your potential with comprehensive IELTS preparation</p>
+        </div> -->
+
+        <div class="plans-grid">
+            <!-- Standard Package -->
+            <div class="plan-card standard-card">
+                <div class="plan-header">
+                    <h2 class="plan-name">Standard</h2>
+                    <div class="plan-price">250,000 <span class="currency">UZS</span></div>
+                    <div class="plan-subtitle">Essential IELTS preparation</div>
+                </div>
+
+                <div class="plan-content">
+                    <ul class="plan-features">
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Reading section practice</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Listening section practice</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Speaking with former native examiners</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Writing checked by experts</div>
+                        </li>
+                    </ul>
+
+                    <button class="plan-button" onclick="selectPlan('standard', 250000)">
+                        Choose Standard
+                    </button>
+                </div>
+            </div>
+
+            <!-- Premium Package -->
+            <div class="plan-card premium-card">
+                <div class="recommended-badge">Most Popular</div>
+                <div class="plan-header">
+                    <h2 class="plan-name">Premium</h2>
+                    <div class="plan-price">500,000 <span class="currency">UZS</span></div>
+                    <div class="plan-subtitle">Enhanced with detailed feedback</div>
+                </div>
+
+                <div class="plan-content">
+                    <ul class="plan-features">
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Reading section practice</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Listening section practice</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">★</div>
+                            <div class="feature-text">
+                                Speaking with native examiners
+                                <span class="feature-highlight">+ Video feedback</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">★</div>
+                            <div class="feature-text">
+                                Writing by experts
+                                <span class="feature-highlight">+ Written feedback</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="plan-extra premium-extra">
+                        <div class="extra-title">Premium Benefits</div>
+                        <ul class="extra-list">
+                            <li>Video feedback for speaking</li>
+                            <li>Detailed written analysis</li>
+                            <li>Performance improvement tips</li>
+                        </ul>
+                    </div>
+
+                    <button class="plan-button" onclick="selectPlan('premium', 500000)">
+                        Choose Premium
+                    </button>
+                </div>
+            </div>
+
+            <!-- VIP Package -->
+            <div class="plan-card vip-card">
+                <div class="plan-header">
+                    <h2 class="plan-name">VIP</h2>
+                    <div class="plan-price">1,000,000 <span class="currency">UZS</span></div>
+                    <div class="plan-subtitle">Ultimate premium experience</div>
+                </div>
+
+                <div class="plan-content">
+                    <ul class="plan-features">
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Reading section practice</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">✓</div>
+                            <div class="feature-text">Listening section practice</div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">⭐</div>
+                            <div class="feature-text">
+                                Top examiner speaking
+                                <span class="feature-highlight">30-45 mins + Live feedback</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="feature-icon">⭐</div>
+                            <div class="feature-text">
+                                Expert writing review
+                                <span class="feature-highlight">+ Video feedback</span>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="plan-extra vip-extra">
+                        <div class="extra-title">VIP Exclusive</div>
+                        <ul class="extra-list">
+                            <li>Extended speaking session</li>
+                            <li>Live recorded feedback</li>
+                            <li>Priority support</li>
+                        </ul>
+                    </div>
+
+                    <button class="plan-button" onclick="selectPlan('vip', 1000000)">
+                        Choose VIP
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <script>
+        function selectPlan(planType, price) {
+            // Store selected plan in localStorage
+            localStorage.setItem('selectedPlan', JSON.stringify({
+                type: planType,
+                price: price,
+                name: planType.charAt(0).toUpperCase() + planType.slice(1)
+            }));
+
+            // Always redirect to schedule page (user should already be logged in to reach plans)
+            window.location.href = 'ofline-schedule.html';
+        }
+
+        // Add some interactive animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.plan-card');
+
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(50px)';
+                    card.style.transition = 'all 0.6s ease';
+
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>
