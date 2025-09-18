@@ -239,15 +239,176 @@
         @media (max-width: 768px) {
             .analytics-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .analytics-card {
+                padding: 20px;
+            }
+
+            .analytics-number {
+                font-size: 1.8rem;
             }
 
             .filter-row {
                 flex-direction: column;
                 align-items: stretch;
+                gap: 10px;
+            }
+
+            .filter-group {
+                flex: 1;
+            }
+
+            .filter-group label {
+                font-size: 0.85rem;
+            }
+
+            .filter-group select,
+            .filter-group input {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+
+            .export-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .payment-table {
-                overflow-x: auto;
+                font-size: 0.8rem;
+                min-width: 800px;
+            }
+
+            .payment-table th,
+            .payment-table td {
+                padding: 8px 6px;
+                white-space: nowrap;
+            }
+
+            .payment-table th:first-child,
+            .payment-table td:first-child {
+                position: sticky;
+                left: 0;
+                background: inherit;
+                z-index: 10;
+                min-width: 100px;
+            }
+
+            .payment-status {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }
+
+            .payment-method-badge {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+            }
+
+            .amount-cell {
+                font-size: 0.85rem;
+            }
+
+            .student-info {
+                font-size: 0.85rem;
+            }
+
+            .student-phone {
+                font-size: 0.75rem;
+            }
+
+            .date-cell {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .analytics-grid {
+                gap: 12px;
+            }
+
+            .analytics-card {
+                padding: 16px;
+            }
+
+            .analytics-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .analytics-number {
+                font-size: 1.5rem;
+                margin: 8px 0 4px;
+            }
+
+            .analytics-label {
+                font-size: 0.8rem;
+            }
+
+            .filter-row {
+                gap: 8px;
+            }
+
+            .filter-group label {
+                font-size: 0.8rem;
+                margin-bottom: 4px;
+            }
+
+            .filter-group select,
+            .filter-group input {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            .payment-table {
+                font-size: 0.75rem;
+                min-width: 700px;
+            }
+
+            .payment-table th,
+            .payment-table td {
+                padding: 6px 4px;
+            }
+
+            .payment-status {
+                font-size: 0.65rem;
+                padding: 2px 6px;
+            }
+
+            .payment-method-badge {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+            }
+
+            .amount-cell {
+                font-size: 0.8rem;
+            }
+
+            .student-info {
+                font-size: 0.8rem;
+            }
+
+            .student-phone {
+                font-size: 0.7rem;
+            }
+
+            .date-cell {
+                font-size: 0.7rem;
+            }
+
+            .no-payments {
+                padding: 40px 15px;
+            }
+
+            .no-payments-icon {
+                width: 48px;
+                height: 48px;
             }
         }
     </style>

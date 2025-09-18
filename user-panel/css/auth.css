@@ -559,13 +559,90 @@
 }
 
 @media (max-width: 480px) {
+    .toast {
+        right: 10px;
+        bottom: 10px;
+        padding: 12px 18px;
+        font-size: 14px;
+    }
+
     .auth-container {
         padding: 8px;
         padding-top: 15px;
     }
-    
+
     .auth-center {
         max-width: 100%;
+    }
+
+    .auth-form {
+        padding: 16px 14px;
+        border-radius: 16px;
+    }
+
+    .auth-toggle {
+        margin-bottom: 12px;
+    }
+
+    .toggle-btn {
+        padding: 8px 18px;
+        font-size: 13px;
+        min-width: 90px;
+    }
+
+    .auth-form h2 {
+        font-size: 18px;
+        margin-bottom: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        margin-bottom: 5px;
+    }
+
+    .form-group input {
+        padding: 10px 12px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 6px;
+    }
+
+    .country-select {
+        padding: 10px 12px;
+        font-size: 16px;
+    }
+
+    .phone-input input {
+        padding: 10px 12px;
+        font-size: 16px;
+    }
+
+    .error-message {
+        font-size: 11px;
+        margin-top: 3px;
+        margin-bottom: 6px;
+    }
+
+    .auth-btn {
+        padding: 12px 18px;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .forgot-password {
+        margin: 10px 0;
+    }
+
+    .forgot-password a {
+        font-size: 13px;
+    }
+
+    .switch-form {
+        margin-top: 10px;
+        font-size: 13px;
     }
     
     .auth-form {
