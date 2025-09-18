@@ -308,15 +308,12 @@ async function proceedToTestDetails() {
     try {
         // Get current user to get user data for backend
         const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-        console.log('DEBUG: Current user data:', currentUser);
 
         // Check if user exists (use firstName as indicator since id might not exist)
         if (currentUser.firstName && currentUser.phone) {
-            console.log('DEBUG: User validation passed, sending to backend...');
 
             try {
                 // First, try to update existing registration for this phone number
-                console.log('DEBUG: Attempting to update existing registration...');
 
                 const updateResponse = await apiClient.request('/registrations/schedule/by-phone', {
                     method: 'PUT',
@@ -326,7 +323,6 @@ async function proceedToTestDetails() {
                     })
                 });
 
-                console.log('DEBUG: Update response:', updateResponse);
 
                 if (updateResponse.success) {
                     // Existing registration updated successfully
@@ -344,7 +340,6 @@ async function proceedToTestDetails() {
                 }
 
             } catch (updateError) {
-                console.log('DEBUG: Update failed, trying to create new registration...', updateError.message);
 
                 // If update fails (user doesn't exist), try to create new registration
                 try {
@@ -357,10 +352,8 @@ async function proceedToTestDetails() {
                         },
                         schedule: scheduleData
                     };
-                    console.log('DEBUG: Sending new registration request data:', requestData);
 
                     const response = await apiClient.post('/registrations/register', requestData);
-                    console.log('DEBUG: New registration response:', response);
 
                     if (response.success) {
                         // Backend registration successful - save registration ID for payment

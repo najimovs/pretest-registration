@@ -214,7 +214,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function showNotification(message, type = 'info') {
     // This function can be used to show notifications
     // You can implement a notification system here
-    console.log(`${type.toUpperCase()}: ${message}`);
 }
 
 function validateForm(formData) {
@@ -226,12 +225,10 @@ function validateForm(formData) {
 // Initialize the page
 function initializePage() {
     // Any initialization code can go here
-    console.log('Profile page initialized successfully');
 }
 
 // User Details Modal Functions - ONLY triggered by clicking avatar
 async function showUserDetails() {
-    console.log('showUserDetails called by avatar click');
 
     try {
         // Get current user from localStorage (simple and fast)
@@ -268,23 +265,18 @@ function closeUserDetails() {
 
 // Removed edit functionality - keeping function stubs for compatibility
 function enableEdit() {
-    console.log('Edit functionality removed');
 }
 
 function cancelEdit() {
-    console.log('Edit functionality removed');
 }
 
 function resetToViewMode() {
-    console.log('Edit functionality removed');
 }
 
 function sendForgotPasswordSMS() {
-    console.log('Edit functionality removed');
 }
 
 async function saveDetails() {
-    console.log('Edit functionality removed - save function disabled');
     return;
     const currentPassword = document.getElementById('modalCurrentPassword').value.trim();
     const newPassword = document.getElementById('modalNewPassword').value.trim();

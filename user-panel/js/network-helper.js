@@ -8,13 +8,11 @@ class NetworkHelper {
     setupEventListeners() {
         window.addEventListener('online', () => {
             this.isOnline = true;
-            console.log('Network: Back online');
             this.showNetworkStatus('Connected', 'success');
         });
 
         window.addEventListener('offline', () => {
             this.isOnline = false;
-            console.log('Network: Gone offline');
             this.showNetworkStatus('No internet connection', 'error');
         });
     }
@@ -34,7 +32,6 @@ class NetworkHelper {
             clearTimeout(timeoutId);
             return true;
         } catch (error) {
-            console.log('Connection check failed:', error.message);
             return false;
         }
     }
@@ -45,7 +42,6 @@ class NetworkHelper {
             const deploymentConfig = window.DEPLOYMENT_CONFIG || {};
             const baseURL = deploymentConfig.BACKEND_URL || 'http://localhost:8000';
 
-            console.log('Testing backend connection to:', baseURL);
 
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -63,7 +59,6 @@ class NetworkHelper {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Backend connection successful:', data);
                 return { success: true, data };
             } else {
                 console.error('Backend responded with error:', response.status, response.statusText);
@@ -146,10 +141,8 @@ class NetworkHelper {
     async retryOperation(operation, maxRetries = 3, delay = 1000) {
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                console.log(`Attempting operation (${attempt}/${maxRetries})`);
                 return await operation();
             } catch (error) {
-                console.log(`Attempt ${attempt} failed:`, error.message);
 
                 if (attempt === maxRetries) {
                     throw error;
@@ -170,13 +163,10 @@ window.networkHelper = networkHelper;
 
 // Test backend connection on load
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('Testing backend connection on page load...');
     const result = await networkHelper.testBackendConnection();
 
     if (!result.success) {
-        console.error('Backend connection test failed:', result.error);
         networkHelper.showNetworkStatus(`Server connection failed: ${result.error}`, 'error');
     } else {
-        console.log('Backend connection test passed');
     }
 });

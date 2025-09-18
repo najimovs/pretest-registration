@@ -7,7 +7,6 @@ class APIClient {
             `${deploymentConfig.BACKEND_URL}/api` :
             'https://pretest-registration.onrender.com/api'; // Fallback to production
         this.isOfflineMode = false; // Now using real backend
-        console.log('API Client using baseURL:', this.baseURL);
     }
 
     async request(endpoint, options = {}) {
@@ -27,11 +26,9 @@ class APIClient {
             ...options,
         };
 
-        console.log('Making API request:', { url, method: config.method || 'GET', baseURL: this.baseURL });
 
         try {
             const response = await fetch(url, config);
-            console.log('API response received:', { status: response.status, url });
 
             if (!response.ok) {
                 console.error('Response not OK:', { status: response.status, statusText: response.statusText });
@@ -63,12 +60,6 @@ class APIClient {
 
             return data;
         } catch (error) {
-            console.error('API request error:', {
-                error: error.message,
-                url,
-                type: error.name,
-                isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-            });
 
             // Handle specific mobile network errors
             if (error.name === 'AbortError') {
@@ -172,7 +163,6 @@ class APIClient {
 
     // Error handler
     handleError(error) {
-        console.error('API Error:', error);
 
         if (error.name === 'TypeError' && error.message.includes('fetch')) {
             return 'Network error. Please check your connection and make sure backend is running.';

@@ -211,7 +211,6 @@ async function proceedToConfirmation() {
                         alert('Payment failed: ' + (result.error_note || 'Unknown error'));
                     } else {
                         // Payment processing or cancelled
-                        console.log('Payment status:', result.status);
                     }
                 });
             } else {
@@ -255,7 +254,6 @@ async function updatePaymentStatusInBackend(status) {
             throw new Error(result.message || 'Failed to update payment status');
         }
 
-        console.log('Payment status updated successfully:', result);
         return result;
     } catch (error) {
         console.error('Error updating payment status:', error);
@@ -309,7 +307,6 @@ function handlePaymentReturn() {
     const transactionId = urlParams.get('transaction_id');
 
     if (status || transactionId) {
-        console.log('Payment return detected:', { status, transactionId });
         // Check payment status and redirect accordingly
         setTimeout(checkPaymentStatus, 1000);
     }

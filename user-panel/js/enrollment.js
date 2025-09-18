@@ -301,9 +301,6 @@ async function startTest() {
             const response = await apiClient.get('/user/tests');
             
             // Debug logging to see what we're getting
-            console.log('📊 Tests API Response:', response);
-            console.log('📊 Response data:', response.data);
-            console.log('📊 Tests available:', response.data?.tests?.length || 0);
             
             if (response.success && response.data.tests && response.data.tests.length > 0) {
                 const availableTest = response.data.tests[0]; // Get first available test
@@ -331,15 +328,11 @@ async function startTest() {
                 }
             } else {
                 hideTestPreparationLoading();
-                console.log('❌ No tests available from backend');
                 if (!response.success) {
-                    console.log('❌ API Response was not successful:', response.message);
                     showErrorMessage(`Test service error: ${response.message || 'Unknown error'}`);
                 } else if (!response.data?.tests) {
-                    console.log('❌ No tests data in response');
                     showErrorMessage('No tests data received from server. Please contact support.');
                 } else if (response.data.tests.length === 0) {
-                    console.log('❌ Tests array is empty');
                     showErrorMessage('⚠️ No active tests available at the moment.\n\n📝 Tests need to be created and published by administrators first.\n\n📞 Please contact support or try again later.');
                 } else {
                     showErrorMessage('No tests available. Please contact support.');
@@ -426,7 +419,6 @@ function collectFormData() {
 // Backend integration functions (to be implemented)
 function submitRegistration() {
     const formData = collectFormData();
-    console.log('Form data to send to backend:', formData);
     
     // Example backend call:
     /*
@@ -439,7 +431,6 @@ function submitRegistration() {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Registration successful:', data);
         nextStep();
     })
     .catch(error => {
@@ -455,15 +446,12 @@ function processPayment() {
         currency: 'UZS'
     };
     
-    console.log('Payment data to process:', paymentData);
     
     // Payment processing logic for Payme/Click
     if (selectedPayment === 'payme') {
         // Integrate with Payme API
-        console.log('Processing Payme payment...');
     } else if (selectedPayment === 'click') {
         // Integrate with Click API
-        console.log('Processing Click payment...');
     }
 }
 

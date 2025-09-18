@@ -334,9 +334,12 @@ async function handleLogin(e) {
             }
         }
 
+        // Get the selected country code
+        const countryCode = document.getElementById('loginSelectedCode').textContent;
+
         // Call backend API with retry logic
         const loginOperation = () => apiClient.login({
-            phone: `+998${phone}`,
+            phone: `${countryCode}${phone}`,
             password: password
         });
 
@@ -482,16 +485,11 @@ async function handleSignup(e) {
     setLoadingState(submitBtn, true);
     
     try {
-        // Ensure phone number has proper country code
-        let formattedPhone = phone;
-        if (!phone.startsWith('+')) {
-            // If phone doesn't start with +, assume it's Uzbekistan and add +998
-            if (phone.startsWith('998')) {
-                formattedPhone = `+${phone}`;
-            } else {
-                formattedPhone = `+998${phone}`;
-            }
-        }
+        // Get the selected country code
+        const countryCode = document.getElementById('signupSelectedCode').textContent;
+
+        // Format phone number with country code
+        let formattedPhone = `${countryCode}${phone}`;
         
         // Call backend API
         const response = await apiClient.register({
