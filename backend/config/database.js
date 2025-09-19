@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import logger from '../utils/logger.js';
 
-dotenv.config();
+dotenv.config({ path: './.env' });
 
 const connectDatabase = async () => {
   try {

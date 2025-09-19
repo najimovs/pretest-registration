@@ -9,7 +9,7 @@ import registrationRoutes from './routes/registrations.js';
 import paymentRoutes from './routes/payments.js';
 import logger from './utils/logger.js';
 
-dotenv.config({ path: '../.env' });
+dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
