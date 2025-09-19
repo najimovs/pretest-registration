@@ -51,7 +51,57 @@ const adminAuth = (req, res, next) => {
   }
 };
 
-// Create new registration
+/**
+ * @swagger
+ * /registrations/register:
+ *   post:
+ *     tags: [Registration]
+ *     summary: Create a new registration
+ *     description: Register a new user for IELTS exam
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - user
+ *             properties:
+ *               user:
+ *                 type: object
+ *                 required:
+ *                   - firstName
+ *                   - lastName
+ *                   - phone
+ *                   - email
+ *                   - password
+ *                 properties:
+ *                   firstName:
+ *                     type: string
+ *                   lastName:
+ *                     type: string
+ *                   phone:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   password:
+ *                     type: string
+ *               schedule:
+ *                 type: object
+ *                 properties:
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                   time:
+ *                     type: string
+ *     responses:
+ *       201:
+ *         description: Registration created successfully
+ *       409:
+ *         description: Phone number already registered
+ *       500:
+ *         description: Server error
+ */
 router.post('/register', validateRegistration, async (req, res) => {
   try {
     const { user, schedule } = req.body;

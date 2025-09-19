@@ -4,10 +4,12 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import mongoSanitize from 'express-mongo-sanitize';
+import swaggerUi from 'swagger-ui-express';
 import connectDatabase from './config/database.js';
 import registrationRoutes from './routes/registrations.js';
 import paymentRoutes from './routes/payments.js';
 import logger from './utils/logger.js';
+import swaggerSpecs from './config/swagger.js';
 
 dotenv.config();
 const app = express();
@@ -143,11 +145,42 @@ app.use((req, res, next) => {
   next();
 });
 
+// Swagger Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'IELTS Registration API Documentation'
+}));
+
 // Routes
 app.use('/api/registrations', registrationRoutes);
 app.use('/api/payments', paymentRoutes);
 
 // Health check
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     tags: [Health]
+ *     summary: Check API health status
+ *     description: Returns the current health status of the API
+ *     responses:
+ *       200:
+ *         description: API is running successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: IELTS Registration API is running
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ */
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,

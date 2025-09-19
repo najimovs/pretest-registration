@@ -150,6 +150,46 @@ function logTransaction(type, data, status = 'info') {
   }
 }
 
+/**
+ * @swagger
+ * /payments/click/prepare:
+ *   post:
+ *     tags: [Payment]
+ *     summary: Click payment preparation
+ *     description: Validates and prepares payment through Click payment system
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - click_trans_id
+ *               - service_id
+ *               - merchant_trans_id
+ *               - amount
+ *               - action
+ *               - sign_time
+ *               - sign_string
+ *             properties:
+ *               click_trans_id:
+ *                 type: string
+ *               service_id:
+ *                 type: integer
+ *               merchant_trans_id:
+ *                 type: string
+ *               amount:
+ *                 type: number
+ *               action:
+ *                 type: integer
+ *               sign_time:
+ *                 type: string
+ *               sign_string:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Payment preparation result
+ */
 // Click Prepare endpoint - validates payment request
 router.post('/click/prepare', async (req, res) => {
   try {
@@ -562,6 +602,34 @@ router.post('/click/complete', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /payments/click/create-payment:
+ *   post:
+ *     tags: [Payment]
+ *     summary: Create Click payment link
+ *     description: Generate payment URL for Click payment system
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - registrationId
+ *             properties:
+ *               registrationId:
+ *                 type: string
+ *                 description: Registration ID
+ *               amount:
+ *                 type: number
+ *                 description: Payment amount
+ *     responses:
+ *       200:
+ *         description: Payment URL generated successfully
+ *       404:
+ *         description: Registration not found
+ */
 // Create payment URL endpoint for frontend
 router.post('/click/create-payment', validatePayment, async (req, res) => {
   try {
