@@ -193,12 +193,17 @@
         </div>
     </div>
 
-    <!-- Click Pay by Card SDK (Official) -->
-    <script src="https://cdn.click.uz/pay/v2/click-checkout.js" async></script>
-    <!-- Fallback SDK -->
-    <script src="https://my.click.uz/services/pay/js/checkout.js" async></script>
-    <!-- Alternative SDK URLs -->
-    <script src="https://checkout.click.uz/checkout.js" async></script>
+    <!-- Click Pay by Card SDK (Primary) -->
+    <script src="https://my.click.uz/services/pay/js/checkout.js" async
+            onload="console.log('✅ Primary Click SDK loaded')"
+            onerror="console.log('❌ Primary Click SDK failed')"></script>
+    <!-- Fallback SDK URLs -->
+    <script src="https://cdn.click.uz/pay/v2/click-checkout.js" async
+            onload="console.log('✅ Fallback SDK v2 loaded')"
+            onerror="console.log('❌ Fallback SDK v2 failed')"></script>
+    <script src="https://api.click.uz/js/checkout.js" async
+            onload="console.log('✅ API Click SDK loaded')"
+            onerror="console.log('❌ API Click SDK failed')"></script>
     <script>
         // Enhanced SDK loading check
         let sdkCheckAttempts = 0;
