@@ -76,6 +76,11 @@ dist
 tmp/
 temp/
 
+# Test files
+test-*.js
+check-*.js
+*-test.js
+
 # Editor directories and files
 .vscode/
 .idea/

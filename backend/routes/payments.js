@@ -16,23 +16,41 @@ const CLICK_CONFIG = {
 
 // Application configuration
 const APP_CONFIG = {
-  TEST_AMOUNT: parseInt(process.env.TEST_AMOUNT) || 2000,
+  STANDARD_AMOUNT: parseInt(process.env.STANDARD_AMOUNT) || 2500,
+  PREMIUM_AMOUNT: parseInt(process.env.PREMIUM_AMOUNT) || 500000,
+  VIP_AMOUNT: parseInt(process.env.VIP_AMOUNT) || 1000000,
+  TEST_AMOUNT: parseInt(process.env.TEST_AMOUNT) || 2500,
   DOMAIN: process.env.DOMAIN || 'localhost',
   PAYMENT_TIMEOUT_MINUTES: 15 // Payment expires after 15 minutes
 };
 
 // Validate configuration
-console.log('🔧 Click Configuration:');
-console.log('  SERVICE_ID:', CLICK_CONFIG.SERVICE_ID);
-console.log('  MERCHANT_ID:', CLICK_CONFIG.MERCHANT_ID);
-console.log('  SECRET_KEY exists:', !!CLICK_CONFIG.SECRET_KEY);
-console.log('  MERCHANT_USER_ID:', CLICK_CONFIG.MERCHANT_USER_ID);
-console.log('  DOMAIN:', APP_CONFIG.DOMAIN);
-console.log('  TEST_AMOUNT:', APP_CONFIG.TEST_AMOUNT);
-
 if (!CLICK_CONFIG.SERVICE_ID || !CLICK_CONFIG.MERCHANT_ID || !CLICK_CONFIG.SECRET_KEY) {
-  console.error('❌ Missing required Click payment configuration!');
-  console.error('Required: CLICK_SERVICE_ID, CLICK_MERCHANT_ID, CLICK_SECRET_KEY');
+  logger.error('Missing required Click payment configuration', {
+    serviceIdExists: !!CLICK_CONFIG.SERVICE_ID,
+    merchantIdExists: !!CLICK_CONFIG.MERCHANT_ID,
+    secretKeyExists: !!CLICK_CONFIG.SECRET_KEY
+  });
+}
+
+// Helper function to get amount based on plan type
+function getAmountForPlanType(planType, customPrice = null) {
+  // If custom price is set in registration, use it
+  if (customPrice && customPrice > 0) {
+    return customPrice;
+  }
+
+  // Otherwise use plan type
+  switch (planType?.toLowerCase()) {
+    case 'standard':
+      return APP_CONFIG.STANDARD_AMOUNT;
+    case 'premium':
+      return APP_CONFIG.PREMIUM_AMOUNT;
+    case 'vip':
+      return APP_CONFIG.VIP_AMOUNT;
+    default:
+      return APP_CONFIG.TEST_AMOUNT; // Default amount
+  }
 }
 
 // Helper function to create MD5 hash for Click (according to Click docs)
@@ -146,24 +164,13 @@ router.post('/click/prepare', async (req, res) => {
       sign_string
     } = req.body;
 
-    // Log incoming prepare request
+    // Log incoming request
     logTransaction('CLICK_PREPARE_REQUEST', {
       click_trans_id,
       merchant_trans_id,
       amount,
       ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
       userAgent: req.headers['user-agent']
-    });
-
-    // Click Prepare Request received
-
-    // Log request origin for debugging
-    logTransaction('CLICK_PREPARE_REQUEST', {
-      click_trans_id,
-      merchant_trans_id,
-      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-      userAgent: req.headers['user-agent'],
-      headers: req.headers
     });
 
     // Validate request origin (Click IP addresses)
@@ -240,11 +247,22 @@ router.post('/click/prepare', async (req, res) => {
       });
     }
 
-    // Get expected amount from registration schedule data
-    const expectedAmount = registration.schedule?.price || APP_CONFIG.TEST_AMOUNT;
+    // Get expected amount using new logic
+    const expectedAmount = getAmountForPlanType(
+      registration.schedule?.planType,
+      registration.schedule?.price
+    );
 
     // Validate amount
     if (parseFloat(amount) !== expectedAmount) {
+      logTransaction('AMOUNT_VALIDATION_FAILED', {
+        click_trans_id,
+        merchant_trans_id,
+        receivedAmount: parseFloat(amount),
+        expectedAmount,
+        planType: registration.schedule?.planType
+      }, 'warning');
+
       return res.json({
         click_trans_id: click_trans_id,
         merchant_trans_id: merchant_trans_id,
@@ -347,17 +365,6 @@ router.post('/click/complete', async (req, res) => {
       merchant_prepare_id,
       amount,
       ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
-    });
-
-    // Click Complete Request received
-
-    // Log request origin for debugging
-    logTransaction('CLICK_COMPLETE_REQUEST', {
-      click_trans_id,
-      merchant_trans_id,
-      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
-      userAgent: req.headers['user-agent'],
-      headers: req.headers
     });
 
     // Validate request origin (Click IP addresses)
@@ -528,8 +535,11 @@ router.post('/click/create-payment', validatePayment, async (req, res) => {
       });
     }
 
-    // Use amount from request or fallback to default
-    const paymentAmount = amount || APP_CONFIG.TEST_AMOUNT;
+    // Use amount from request or calculate based on registration plan
+    const paymentAmount = amount || getAmountForPlanType(
+      registration.schedule?.planType,
+      registration.schedule?.price
+    );
     const transactionParam = `ielts_${registration._id}`;
 
     const paymentData = {

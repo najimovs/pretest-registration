@@ -13,11 +13,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// Render deployment check
-console.log('🚀 Environment:', process.env.NODE_ENV);
-console.log('🗃️ MongoDB URI exists:', !!process.env.MONGODB_URI);
-console.log('🔑 JWT Secret exists:', !!process.env.JWT_SECRET);
-console.log('📡 Port:', PORT);
+// Production startup info
+if (process.env.NODE_ENV === 'development') {
+  console.log('🚀 Environment:', process.env.NODE_ENV);
+  console.log('🗃️ MongoDB URI exists:', !!process.env.MONGODB_URI);
+  console.log('🔑 JWT Secret exists:', !!process.env.JWT_SECRET);
+  console.log('📡 Port:', PORT);
+}
 
 // ✅ Render / Heroku kabi platformalarda proxy orqasida IP olish uchun
 app.set('trust proxy', 1);
