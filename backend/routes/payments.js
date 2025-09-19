@@ -8,10 +8,10 @@ const router = express.Router();
 
 // Click payment configuration
 const CLICK_CONFIG = {
-  SERVICE_ID: parseInt(process.env.CLICK_SERVICE_ID) || 82886,
-  MERCHANT_ID: parseInt(process.env.CLICK_MERCHANT_ID) || 46111,
-  SECRET_KEY: process.env.CLICK_SECRET_KEY || '9TDkmspVHm7LZ',
-  MERCHANT_USER_ID: parseInt(process.env.CLICK_MERCHANT_USER_ID) || 64082
+  SERVICE_ID: parseInt(process.env.CLICK_SERVICE_ID),
+  MERCHANT_ID: parseInt(process.env.CLICK_MERCHANT_ID),
+  SECRET_KEY: process.env.CLICK_SECRET_KEY,
+  MERCHANT_USER_ID: parseInt(process.env.CLICK_MERCHANT_USER_ID)
 };
 
 // Application configuration
