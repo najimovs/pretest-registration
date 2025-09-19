@@ -31,6 +31,7 @@ const allowedOrigins = [
   'https://fantastic-seahorse-9ee1ac.netlify.app',
   'https://admin.pretest-uzbekistan.uz',
   'http://admin.pretest-uzbekistan.uz',
+  'https://pretest-registration.onrender.com',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
