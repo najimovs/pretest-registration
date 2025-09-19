@@ -23,6 +23,10 @@ connectDatabase();
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.ADMIN_PANEL_URL,
+  'https://pretest-uzbekistan.uz',
+  'http://pretest-uzbekistan.uz',
+  'https://www.pretest-uzbekistan.uz',
+  'http://www.pretest-uzbekistan.uz',
   'https://whimsical-sprite-8f17d6.netlify.app',
   'https://fantastic-seahorse-9ee1ac.netlify.app',
   'https://admin.pretest-uzbekistan.uz',
@@ -51,6 +55,10 @@ const corsOptions = {
     }
     // Allow any Vercel app domains
     else if (origin && (origin.endsWith('.vercel.app') || origin.endsWith('.vercel.com'))) {
+      callback(null, true);
+    }
+    // Allow pretest-uzbekistan.uz subdomains
+    else if (origin && origin.endsWith('.pretest-uzbekistan.uz')) {
       callback(null, true);
     }
     else {

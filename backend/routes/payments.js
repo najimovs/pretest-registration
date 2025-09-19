@@ -94,10 +94,10 @@ async function cleanupExpiredPayments() {
     }
 
     if (expiredPayments.length > 0) {
-      console.log(`Cleaned up ${expiredPayments.length} expired payments`);
+      logger.info(`Cleaned up ${expiredPayments.length} expired payments`);
     }
   } catch (error) {
-    console.error('Error cleaning up expired payments:', error);
+    logger.error('Error cleaning up expired payments:', error);
   }
 }
 
@@ -158,7 +158,7 @@ router.post('/click/prepare', async (req, res) => {
     });
 
     // IP validation temporarily disabled for testing
-    // TODO: Re-enable IP validation after confirming Click IPs
+    // IP validation temporarily disabled
 
     // Validate required fields
     if (!click_trans_id || !service_id || !click_paydoc_id || !merchant_trans_id || !amount || action === undefined || !sign_time || !sign_string) {
@@ -342,7 +342,7 @@ router.post('/click/complete', async (req, res) => {
     });
 
     // IP validation temporarily disabled for testing
-    // TODO: Re-enable IP validation after confirming Click IPs
+    // IP validation temporarily disabled
 
     // Validate required fields
     if (!click_trans_id || !service_id || !click_paydoc_id || !merchant_trans_id || !merchant_prepare_id || !amount || action === undefined || !sign_time || !sign_string) {
@@ -537,7 +537,7 @@ router.post('/click/create-payment', validatePayment, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Create payment URL error:', error);
+    logger.error('Create payment URL error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create payment URL',
@@ -571,7 +571,7 @@ router.get('/status/:registrationId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Check payment status error:', error);
+    logger.error('Check payment status error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to check payment status',
@@ -625,7 +625,7 @@ router.post('/update-status', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Update payment status error:', error);
+    logger.error('Update payment status error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update payment status',

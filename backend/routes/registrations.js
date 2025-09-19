@@ -109,7 +109,7 @@ router.post('/register', validateRegistration, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    logger.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to create registration',
@@ -131,7 +131,7 @@ router.get('/all', adminAuth, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get registrations error:', error);
+    logger.error('Get registrations error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch registrations',
@@ -177,7 +177,7 @@ router.put('/:id/schedule', validateScheduleUpdate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update schedule error:', error);
+    logger.error('Update schedule error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update schedule',
@@ -222,7 +222,7 @@ router.put('/schedule/by-phone', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update schedule by phone error:', error);
+    logger.error('Update schedule by phone error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update schedule',
@@ -256,7 +256,7 @@ router.put('/:id/status', adminAuth, async (req, res) => {
       data: registration
     });
   } catch (error) {
-    console.error('Update status error:', error);
+    logger.error('Update status error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update status',
@@ -284,7 +284,7 @@ router.delete('/:id', adminAuth, async (req, res) => {
       message: 'Registration deleted successfully'
     });
   } catch (error) {
-    console.error('Delete registration error:', error);
+    logger.error('Delete registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete registration',
@@ -393,7 +393,7 @@ router.post('/login', validateLogin, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('User login error:', error);
+    logger.error('User login error:', error);
     res.status(500).json({
       success: false,
       message: 'Login failed',
