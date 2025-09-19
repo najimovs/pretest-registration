@@ -173,24 +173,24 @@ async function proceedToConfirmation() {
             nextBtn.textContent = 'Pay Now';
             nextBtn.disabled = false;
 
-            // Use Click JavaScript SDK
-            if (typeof createPaymentRequest !== 'undefined') {
-                // Use correct parameter names as per Click docs
-                const clickConfig = {
-                    service_id: config.service_id,
+            // Use Click JavaScript SDK with updated API
+            if (typeof window.CLICK !== 'undefined' && window.CLICK.checkout) {
+                // New Click SDK v2 API
+                const checkoutParams = {
                     merchant_id: config.merchant_id,
-                    amount: config.amount,
+                    service_id: config.service_id,
                     transaction_param: config.transaction_param,
+                    amount: config.amount,
                     merchant_user_id: config.merchant_user_id
                 };
 
-                // Click payment configured
+                console.log('Starting Click checkout with params:', checkoutParams);
 
-                createPaymentRequest(clickConfig, function(result) {
-                    // Click payment completed
+                window.CLICK.checkout.start(checkoutParams, function(result) {
+                    console.log('Click payment result:', result);
 
-                    if (result.status === 2) {
-                        // Payment successful - update backend and finalize schedule
+                    if (result.status === 0) {
+                        // Payment successful
                         updatePaymentStatusInBackend('completed').then(() => {
                             // Move from pending to final schedule
                             const finalSchedule = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
@@ -207,16 +207,48 @@ async function proceedToConfirmation() {
                             // Still redirect to success page since payment was successful
                             window.location.href = 'payment-success.html';
                         });
-                    } else if (result.status < 0) {
-                        // Payment error
-                        alert('Payment failed: ' + (result.error_note || 'Unknown error'));
                     } else {
-                        // Payment processing or cancelled
+                        // Payment failed or cancelled
+                        console.error('Payment failed with status:', result.status);
+                        alert('Payment failed. Please try again.');
+                    }
+                });
+            } else if (typeof createPaymentRequest !== 'undefined') {
+                // Fallback to old SDK
+                const clickConfig = {
+                    service_id: config.service_id,
+                    merchant_id: config.merchant_id,
+                    amount: config.amount,
+                    transaction_param: config.transaction_param,
+                    merchant_user_id: config.merchant_user_id
+                };
+
+                createPaymentRequest(clickConfig, function(result) {
+                    console.log('Click payment result (old SDK):', result);
+
+                    if (result.status === 2 || result.status === 0) {
+                        // Payment successful
+                        updatePaymentStatusInBackend('completed').then(() => {
+                            const finalSchedule = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+                            finalSchedule.paymentStatus = 'completed';
+                            finalSchedule.paidAt = new Date().toISOString();
+
+                            localStorage.setItem('testSchedule', JSON.stringify(finalSchedule));
+                            localStorage.removeItem('pendingSchedule');
+
+                            window.location.href = 'payment-success.html';
+                        }).catch((error) => {
+                            console.error('Failed to update payment status:', error);
+                            window.location.href = 'payment-success.html';
+                        });
+                    } else {
+                        console.error('Payment failed with result:', result);
+                        alert('Payment failed. Please try again.');
                     }
                 });
             } else {
                 alert('Payment system not loaded. Please refresh the page and try again.');
-                console.error('createPaymentRequest function not available. SDK might not be loaded.');
+                console.error('Click payment SDK not available.');
             }
         }
 

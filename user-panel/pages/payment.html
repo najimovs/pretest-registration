@@ -193,8 +193,17 @@
         </div>
     </div>
 
-    <!-- Click Pay by Card SDK -->
+    <!-- Click Pay by Card SDK v2 -->
     <script src="https://my.click.uz/pay/checkout.js"></script>
+    <!-- Backup SDK -->
+    <script>
+        // Ensure Click SDK is loaded properly
+        if (typeof window.CLICK === 'undefined') {
+            console.log('Click SDK not loaded, using fallback');
+        } else {
+            console.log('Click SDK loaded successfully');
+        }
+    </script>
     <script src="../../js/deployment-config.js"></script>
     <script src="../../js/offline-payment.js"></script>
 </body>
