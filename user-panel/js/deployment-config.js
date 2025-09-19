@@ -21,10 +21,8 @@ window.navigateToAdminPanel = function() {
     window.open(config.ADMIN_PANEL_URL, '_blank');
 };
 
-// Force production config for now since localhost backend isn't running
 // Auto-detect environment
-const isDevelopment = false; // Temporarily forced to false
-// const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const config = isDevelopment ? DEPLOYMENT_CONFIG.development : DEPLOYMENT_CONFIG.production;
 
 
