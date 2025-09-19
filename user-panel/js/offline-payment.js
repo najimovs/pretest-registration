@@ -247,8 +247,23 @@ async function proceedToConfirmation() {
                     }
                 });
             } else {
-                alert('Payment system not loaded. Please refresh the page and try again.');
-                console.error('Click payment SDK not available.');
+                // Enhanced error handling for SDK not available
+                console.error('Click payment SDK not available. Available objects:', {
+                    CLICK: typeof window.CLICK,
+                    ClickCheckout: typeof window.ClickCheckout,
+                    createPaymentRequest: typeof window.createPaymentRequest,
+                    clickSDKLoaded: window.clickSDKLoaded
+                });
+
+                // Show more helpful error message
+                alert('To\'lov tizimi yuklanmadi. Sahifani yangilab qayta urinib ko\'ring.\n\nPayment system not loaded. Please refresh the page and try again.');
+
+                // Try to reload the page after a delay
+                setTimeout(() => {
+                    if (confirm('Sahifani avtomatik yangilaymi?\n\nShould we refresh the page automatically?')) {
+                        window.location.reload();
+                    }
+                }, 2000);
             }
         }
 

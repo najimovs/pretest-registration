@@ -194,18 +194,47 @@
     </div>
 
     <!-- Click Pay by Card SDK (Official) -->
-    <script src="https://cdn.click.uz/pay/v2/click-checkout.js"></script>
+    <script src="https://cdn.click.uz/pay/v2/click-checkout.js" async></script>
     <!-- Fallback SDK -->
-    <script src="https://my.click.uz/services/pay/js/checkout.js"></script>
+    <script src="https://my.click.uz/services/pay/js/checkout.js" async></script>
+    <!-- Alternative SDK URLs -->
+    <script src="https://checkout.click.uz/checkout.js" async></script>
     <script>
-        // Check if Click SDK is loaded
-        setTimeout(() => {
-            if (typeof window.CLICK === 'undefined' && typeof window.ClickCheckout === 'undefined') {
-                console.log('Click SDK not loaded, using fallback');
-            } else {
-                console.log('Click SDK loaded successfully');
+        // Enhanced SDK loading check
+        let sdkCheckAttempts = 0;
+        const maxAttempts = 10;
+
+        function checkSDKLoaded() {
+            sdkCheckAttempts++;
+            console.log(`SDK Check attempt ${sdkCheckAttempts}:`, {
+                CLICK: typeof window.CLICK,
+                ClickCheckout: typeof window.ClickCheckout,
+                createPaymentRequest: typeof window.createPaymentRequest
+            });
+
+            if (typeof window.CLICK !== 'undefined' ||
+                typeof window.ClickCheckout !== 'undefined' ||
+                typeof window.createPaymentRequest !== 'undefined') {
+                console.log('✅ Click SDK loaded successfully');
+                window.clickSDKLoaded = true;
+                return true;
             }
-        }, 1000);
+
+            if (sdkCheckAttempts < maxAttempts) {
+                setTimeout(checkSDKLoaded, 500);
+            } else {
+                console.error('❌ Click SDK failed to load after', maxAttempts, 'attempts');
+                window.clickSDKLoaded = false;
+            }
+            return false;
+        }
+
+        // Start checking after DOM loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkSDKLoaded);
+        } else {
+            checkSDKLoaded();
+        }
     </script>
     <script src="../../js/deployment-config.js"></script>
     <script src="../../js/offline-payment.js"></script>
