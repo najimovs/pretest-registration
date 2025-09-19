@@ -164,11 +164,20 @@ router.post('/click/prepare', async (req, res) => {
       sign_string
     } = req.body;
 
-    // Log incoming request
+    // Log incoming request with full details
+    console.log('=== CLICK PREPARE REQUEST ===');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    console.log('IP:', req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+
     logTransaction('CLICK_PREPARE_REQUEST', {
       click_trans_id,
       merchant_trans_id,
       amount,
+      service_id,
+      action,
+      sign_time,
+      full_body: req.body,
       ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
       userAgent: req.headers['user-agent']
     });
@@ -236,8 +245,24 @@ router.post('/click/prepare', async (req, res) => {
     }
 
     // Find registration first to get the expected amount
-    const registration = await Registration.findById(merchant_trans_id);
+    console.log('Looking for registration with ID:', merchant_trans_id);
+    let registration;
+    try {
+      registration = await Registration.findById(merchant_trans_id);
+    } catch (dbError) {
+      console.log('Database error finding registration:', dbError.message);
+      console.log('merchant_trans_id format:', typeof merchant_trans_id, merchant_trans_id);
+      return res.json({
+        click_trans_id: click_trans_id,
+        merchant_trans_id: merchant_trans_id,
+        merchant_prepare_id: null,
+        error: -5,
+        error_note: "Invalid order ID format"
+      });
+    }
+
     if (!registration) {
+      console.log('Registration not found for ID:', merchant_trans_id);
       return res.json({
         click_trans_id: click_trans_id,
         merchant_trans_id: merchant_trans_id,
@@ -246,6 +271,8 @@ router.post('/click/prepare', async (req, res) => {
         error_note: "Order not found"
       });
     }
+
+    console.log('Registration found:', registration._id);
 
     // Get expected amount using new logic
     const expectedAmount = getAmountForPlanType(
@@ -320,6 +347,11 @@ router.post('/click/prepare', async (req, res) => {
     });
 
   } catch (error) {
+    console.log('ERROR: System error in PREPARE endpoint');
+    console.log('Error details:', error.message);
+    console.log('Stack:', error.stack);
+    console.log('Request body:', req.body);
+
     logger.error('Click Prepare Error:', {
       error: error.message,
       stack: error.stack,
@@ -358,13 +390,23 @@ router.post('/click/complete', async (req, res) => {
       sign_string
     } = req.body;
 
-    // Log incoming complete request
+    // Log incoming complete request with full details
+    console.log('=== CLICK COMPLETE REQUEST ===');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+    console.log('IP:', req.headers['x-forwarded-for'] || req.connection.remoteAddress);
+
     logTransaction('CLICK_COMPLETE_REQUEST', {
       click_trans_id,
       merchant_trans_id,
       merchant_prepare_id,
       amount,
-      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      service_id,
+      action,
+      sign_time,
+      full_body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+      userAgent: req.headers['user-agent']
     });
 
     // Validate request origin (Click IP addresses)
