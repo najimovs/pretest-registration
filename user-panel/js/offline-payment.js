@@ -260,21 +260,15 @@ async function proceedToConfirmation() {
                 // Fallback: Use Click Button URL for card payments too
                 const clickButtonUrl = paymentData.data.paymentData.clickButton.url;
 
-                if (confirm('Karta to\'lovi uchun Click saytiga o\'tamiz.\n\nWe will redirect to Click website for card payment.')) {
-                    // Store payment info before redirect
-                    const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
-                    scheduleData.paymentMethod = 'pay-by-card-redirect';
-                    scheduleData.paymentStatus = 'initiated';
-                    localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
+                // Store payment info before redirect
+                const scheduleData = JSON.parse(localStorage.getItem('pendingSchedule') || '{}');
+                scheduleData.paymentMethod = 'pay-by-card-redirect';
+                scheduleData.paymentStatus = 'initiated';
+                localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
 
-                    // Redirect to Click
-                    console.log('Redirecting to Click for card payment:', clickButtonUrl);
-                    window.location.href = clickButtonUrl;
-                } else {
-                    // Reset button if user cancels
-                    nextBtn.textContent = 'Pay Now';
-                    nextBtn.disabled = false;
-                }
+                // Direct redirect to Click without confirmation
+                console.log('Redirecting to Click for card payment:', clickButtonUrl);
+                window.location.href = clickButtonUrl;
             }
         }
 
