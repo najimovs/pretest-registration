@@ -22,8 +22,17 @@ const APP_CONFIG = {
 };
 
 // Validate configuration
+console.log('🔧 Click Configuration:');
+console.log('  SERVICE_ID:', CLICK_CONFIG.SERVICE_ID);
+console.log('  MERCHANT_ID:', CLICK_CONFIG.MERCHANT_ID);
+console.log('  SECRET_KEY exists:', !!CLICK_CONFIG.SECRET_KEY);
+console.log('  MERCHANT_USER_ID:', CLICK_CONFIG.MERCHANT_USER_ID);
+console.log('  DOMAIN:', APP_CONFIG.DOMAIN);
+console.log('  TEST_AMOUNT:', APP_CONFIG.TEST_AMOUNT);
+
 if (!CLICK_CONFIG.SERVICE_ID || !CLICK_CONFIG.MERCHANT_ID || !CLICK_CONFIG.SECRET_KEY) {
-  console.error('Missing required Click payment configuration. Please set CLICK_SERVICE_ID, CLICK_MERCHANT_ID, and CLICK_SECRET_KEY environment variables.');
+  console.error('❌ Missing required Click payment configuration!');
+  console.error('Required: CLICK_SERVICE_ID, CLICK_MERCHANT_ID, CLICK_SECRET_KEY');
 }
 
 // Helper function to create MD5 hash for Click (according to Click docs)
@@ -157,8 +166,18 @@ router.post('/click/prepare', async (req, res) => {
       headers: req.headers
     });
 
-    // IP validation temporarily disabled for testing
-    // IP validation temporarily disabled
+    // Validate request origin (Click IP addresses)
+    if (process.env.STRICT_IP_VALIDATION === 'true') {
+      if (!validateClickOrigin(req)) {
+        return res.json({
+          click_trans_id: click_trans_id,
+          merchant_trans_id: merchant_trans_id,
+          merchant_prepare_id: null,
+          error: -9,
+          error_note: "Invalid request origin"
+        });
+      }
+    }
 
     // Validate required fields
     if (!click_trans_id || !service_id || !click_paydoc_id || !merchant_trans_id || !amount || action === undefined || !sign_time || !sign_string) {
@@ -341,8 +360,18 @@ router.post('/click/complete', async (req, res) => {
       headers: req.headers
     });
 
-    // IP validation temporarily disabled for testing
-    // IP validation temporarily disabled
+    // Validate request origin (Click IP addresses)
+    if (process.env.STRICT_IP_VALIDATION === 'true') {
+      if (!validateClickOrigin(req)) {
+        return res.json({
+          click_trans_id: click_trans_id,
+          merchant_trans_id: merchant_trans_id,
+          merchant_prepare_id: null,
+          error: -9,
+          error_note: "Invalid request origin"
+        });
+      }
+    }
 
     // Validate required fields
     if (!click_trans_id || !service_id || !click_paydoc_id || !merchant_trans_id || !merchant_prepare_id || !amount || action === undefined || !sign_time || !sign_string) {
