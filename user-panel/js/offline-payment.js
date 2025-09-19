@@ -247,15 +247,34 @@ async function proceedToConfirmation() {
                     }
                 });
             } else {
-                // Enhanced error handling for SDK not available
-                console.error('Click payment SDK not available. Available objects:', {
-                    CLICK: typeof window.CLICK,
-                    ClickCheckout: typeof window.ClickCheckout,
-                    createPaymentRequest: typeof window.createPaymentRequest,
-                    clickSDKLoaded: window.clickSDKLoaded
-                });
+                // Show designed notification and redirect
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 20px 30px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                    text-align: center;
+                    z-index: 10000;
+                    min-width: 300px;
+                `;
 
-                console.log('Falling back to Click Button redirect for card payment');
+                notification.innerHTML = `
+                    <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">
+                        🔄 Redirecting to Payment
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9;">
+                        Click saytiga o'tkazilmoqda...
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
 
                 // Fallback: Use Click Button URL for card payments too
                 const clickButtonUrl = paymentData.data.paymentData.clickButton.url;
@@ -266,9 +285,10 @@ async function proceedToConfirmation() {
                 scheduleData.paymentStatus = 'initiated';
                 localStorage.setItem('pendingSchedule', JSON.stringify(scheduleData));
 
-                // Direct redirect to Click without confirmation
-                console.log('Redirecting to Click for card payment:', clickButtonUrl);
-                window.location.href = clickButtonUrl;
+                // Redirect after showing notification
+                setTimeout(() => {
+                    window.location.href = clickButtonUrl;
+                }, 1500);
             }
         }
 
