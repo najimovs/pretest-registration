@@ -4,9 +4,15 @@
   "description": "Backend API for IELTS Registration System",
   "main": "server.js",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required'",
+    "postinstall": "echo 'Dependencies installed'"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
